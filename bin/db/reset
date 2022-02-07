@@ -1,0 +1,2 @@
+rm -rf postgres-data
+rm -rf datasources/postgres/data

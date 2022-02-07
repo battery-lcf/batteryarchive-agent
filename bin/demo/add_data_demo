@@ -1,0 +1,2 @@
+# tests/payloads/data.json
+curl --request POST 0.0.0.0:4000/cells -d @tests/payloads/localdata.json --header 'Content-type:application/json'

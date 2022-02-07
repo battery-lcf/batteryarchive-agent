@@ -1,0 +1,11 @@
+## Run the comp
+docker-compose up -d
+
+## Add all of the pre-built queries now
+## This needs to be done after bringing up the docker-compose stack. Reliant on nginx being ready
+##sudo python3 scripts/redash_queries/query_import.py --api-key=$ADMIN_API_KEY --redash-url=$HOST_IP_ADDRESS
+
+
+#(sudo python3 scripts/redash_queries/query_import.py --api-key=$ADMIN_API_KEY --redash-url=http://$HOST_IP_ADDRESS
+echo "To connect to the Dashboard visit: http://0.0.0.0:5000"
+echo "To connect to the API visit: http://0.0.0.0:4000"

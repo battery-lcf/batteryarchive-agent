@@ -1,0 +1,51 @@
+set -a
+source ./env
+set +a
+
+echo "Email: "
+read -r DEFAULT_EMAIL
+
+echo "Password: "
+read -s REDASH_ADMIN_PASSWORD
+
+echo "Creating DB..."
+## echo "DATABASE CONNECTION=" ${DATABASE_CONNECTION}
+## echo "REDASH ADMIN PASS=" ${REDASH_ADMIN_PASSWORD} 
+## echo "DEFAULT EMAIL=" ${DEFAULT_EMAIL}
+docker-compose run --rm server create_db
+echo "DB Created. Done"
+
+echo "Creating Dashboard Admin User..."
+docker-compose run --rm server manage users create_root --password ${REDASH_ADMIN_PASSWORD} ${DEFAULT_EMAIL} admin 
+echo "Dashboard Admin Created. Done"
+
+echo "Creating Admin Redash User..."
+## Retrieve the API Key from the first user we created
+
+ADMIN_API_KEY=$(docker-compose run --rm postgres psql -d ${REDASH_DATABASE_URL} -c "SELECT api_key FROM public.users" | sed -n '3 p' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+rm key
+echo ADMIN_API_KEY=${ADMIN_API_KEY} >> key
+echo "Admin User Created. Done."
+
+## Run server manage entrypoint. This runs
+## /app/manage.py users create_root [admin_email] admin --password [admin_email]
+## This command is to create a base line admin user. 
+
+HOST_IP_ADDRESS=ds-postgres
+POSTGRES_DB_NAME="postgres"
+POSTGRES_DB_USER="postgres"
+
+## Run server manage entrypoint. This runs
+## /app/manage.py manage ds new --type pg --options 
+echo "This will create the first datasource that will hold the cell data"
+
+### Data source options JSON format to populate the database
+DATASOURCE_OPTIONS_JSON_FMT='{"dbname":"%s","host":"%s","port":5432,"password":"%s","user":"%s"}'
+DATASOURCE_OPTIONS_JSON_STRING=$(printf "${DATASOURCE_OPTIONS_JSON_FMT}" ${POSTGRES_DB_NAME} ${HOST_IP_ADDRESS} ${POSTGRES_PASSWORD} ${POSTGRES_DB_USER})
+
+## Add the first datasource
+echo "Adding Data source to Redash..."
+docker-compose run -d --rm server manage ds new --type pg --options ${DATASOURCE_OPTIONS_JSON_STRING} "battery_archive" 
+
+echo "Setup Complete."
+
