@@ -3,8 +3,8 @@ currentdir = os.getcwd()
 sys.path.append(os.path.join(currentdir))
 sys.path.append(os.path.join(currentdir, 'app'))
 from os.path import exists
-from app.archive_constants import DB_URL, LIVE_DB_URL, FORMAT
-from app.controllers import cell_controller as cc 
+from batteryarchive.app.archive_constants import DB_URL, LIVE_DB_URL, FORMAT
+from batteryarchive.app.controllers import cell_controller as cc 
 
 def py_cell_import(cell_list_path):
     cc.import_cells_xls_to_db(cell_list_path)
