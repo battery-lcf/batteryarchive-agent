@@ -9,18 +9,10 @@ echo "Password: "
 read -s ADMIN_PASSWORD
 
 echo "Creating DB..."
-REDASH_DATABASE_URL="postgresql://postgres:${ADMIN_PASSWORD}@postgres/postgres"
-DATABASE_CONNECTION="postgresql://postgres:${ADMIN_PASSWORD}@ds-postgres:5432/postgres"
-
-echo "REDASH_DATABASE_URL=$REDASH_DATABASE_URL" >> env
-echo "DATABASE_CONNECTION=$DATABASE_CONNECTION" >> env
-
 docker-compose run --rm server create_db
 echo "DB Created. Done"
 
 echo "Creating Dashboard Admin User..."
-echo $ADMIN_PASSWORD
-echo $DEFAULT_EMAIL
 docker-compose run --rm server manage users create_root --password $ADMIN_PASSWORD $DEFAULT_EMAIL admin 
 echo "Dashboard Admin Created. Done"
 
