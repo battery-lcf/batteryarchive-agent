@@ -1,0 +1,12 @@
+apt-get update && apt-get install -y pwgen
+rm env
+SECRET_KEY=$(pwgen -1s 32)
+COOKIE_SECRET=$(pwgen -1s 32)
+echo "writing configurations to env..."
+echo "PYTHONUNBUFFERED=0" >> env
+echo "REDASH_LOG_LEVEL=INFO" >> env
+echo "REDASH_REDIS_URL=redis://redis:6379/0" >> env
+echo "REDASH_COOKIE_SECRET=$COOKIE_SECRET" >> env
+echo "REDASH_SECRET_KEY=$SECRET_KEY" >> env
+echo "POSTGRES_HOST_AUTH_METHOD=trust" >> env
+echo "done."
