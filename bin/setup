@@ -10,10 +10,11 @@ read -s ADMIN_PASSWORD
 
 echo "Creating DB..."
 docker-compose run --rm server create_db
+
 echo "DB Created. Done"
 
 echo "Creating Dashboard Admin User..."
-docker-compose run --rm server manage users create_root --password $ADMIN_PASSWORD $DEFAULT_EMAIL admin 
+docker-compose run --rm server manage users create_root --password ${ADMIN_PASSWORD} ${DEFAULT_EMAIL} admin 
 echo "Dashboard Admin Created. Done"
 
 echo "Creating Admin Redash User..."
