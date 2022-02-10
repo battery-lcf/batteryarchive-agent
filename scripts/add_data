@@ -1,3 +1,3 @@
 #To run
-# ./bin/add_data payload.json
+# ./scripts/add_data payload.json
 curl --request POST 0.0.0.0:4000/cells -d @$1 --header 'Content-type:application/json'
