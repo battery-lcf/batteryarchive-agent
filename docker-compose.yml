@@ -90,3 +90,5 @@ services:
     links:
       - "ds-postgres:ds-postgres"
     restart: always
+    volumes:
+      - "./data/:/data/"
