@@ -1,3 +1,7 @@
-#To run
-# ./scripts/add_data payload.json
+#
+# Run from the project root folder
+# To import sample cycle data: ./scripts/add_data cycle_data.json
+# To import sample abise data: ./scripts/add_data abuse_data.json
+#
+
 curl --request POST 0.0.0.0:4000/cells -d @$1 --header 'Content-type:application/json'
