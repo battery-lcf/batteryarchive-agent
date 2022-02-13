@@ -18,7 +18,8 @@ To install the battery-archive agent follow these steps:
 1. git clone https://github.com/battery-lcf/batteryarchive-agent
 2. cd batteryarchive-agent
 3. ./bin/gen_env
-4. ./bin/setup5. ./bin/start
+4. ./bin/setup
+5. ./bin/start
 
 The script gen_env generates the information required to access the Postgres database where your battery data is installed. You can see what is in the env file by running more env.
 
