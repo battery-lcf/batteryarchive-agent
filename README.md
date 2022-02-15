@@ -17,7 +17,7 @@ To install the battery-archive agent follow these steps:
 
 1. git clone https://github.com/battery-lcf/batteryarchive-agent
 2. cd batteryarchive-agent
-3. ./bin/gen_env
+3. ./bin/docker_gen_env
 4. ./bin/setup
 5. ./bin/start
 
