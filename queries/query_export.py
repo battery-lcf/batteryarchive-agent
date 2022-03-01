@@ -6,6 +6,7 @@ Name: {name}
 Data source: {data_source}
 Created By: {created_by}
 Last Update At: {last_updated_at}
+Visualizations: {visualizations}
 */
 
 {query}"""
@@ -25,6 +26,12 @@ def get_queries(url, api_key):
 
     return queries
 
+def get_visualizations(queries, url, api_key):
+    headers = {'Authorization' : 'Key {}'.format(api_key)}
+    for query in queries:
+        path = "{}/api/queries/{}".format(url, query['id'])
+        response = requests.get(path, headers=headers, params={}).json()
+        query['visualizations'] = response['visualizations']
 
 def save_queries(queries):
     for query in queries:
@@ -34,6 +41,7 @@ def save_queries(queries):
                        data_source=query['data_source_id'],
                        created_by=query['user']['name'],
                        last_updated_at=query['updated_at'],
+                       visualizations=query['visualizations'],
                        query=query['query'])
             print(content)
             f.write(content)
@@ -44,7 +52,9 @@ def save_queries(queries):
 @click.option('--redash-url')
 @click.option('--api-key', help="API Key")
 def main(redash_url, api_key):
-    queries = get_queries(redash_url, api_key)      
+    queries = get_queries(redash_url, api_key)    
+    # Pull the visualization for each  query. Append it to that query's item
+    get_visualizations(queries, redash_url, api_key) 
     save_queries(queries)
 
 
