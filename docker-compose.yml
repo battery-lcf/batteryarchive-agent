@@ -92,3 +92,12 @@ services:
     restart: always
     volumes:
       - "./data/:/data/"
+  swagger-ui:
+     image: swaggerapi/swagger-ui
+     container_name: swagger_ui_container
+     ports:
+        - "1080:8080"
+     volumes:
+       - "./api/:/usr/share/nginx/html/api"
+     environment:
+       API_URL: api/api.yaml

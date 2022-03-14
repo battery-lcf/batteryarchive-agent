@@ -1,0 +1,412 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Battery Archive API
+paths:
+  /:
+    get:
+      summary: Root Path
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: root
+      tags:
+        - general
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /ga/publish/finish/{tracker}:
+    post:
+      summary: "test api endpoint"
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: finish
+      parameters:
+      - name: tracker
+        in: path
+        description: Dataset ID of the resource to get from Galvanalyser
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Finish
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracker:
+                    type: string
+                    example: "uuid_abc_123"
+  /ga/publish/{dataset_id}:
+    post:
+      summary: Handler for Galvanalyser Publishing
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: ga_publish
+      tags:
+        - publish
+      parameters:
+      - name: dataset_id
+        in: path
+        description: Dataset ID of the resource to get from Galvanalyser
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+        
+      responses:
+        '200':
+          description: Publish
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracker:
+                    type: string
+                    example: "uuid_abc_123"
+  /ga/publish/status/{tracker}:
+    get:
+      summary: Status Checker for Galvanalyser Publishing
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: ga_publish_status
+      tags:
+        - general
+      parameters:
+      - name: tracker
+        in: path
+        description: status tracker
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: object
+                properties:
+                  tracker:
+                    type: string
+                    example: "uuid_abc_123"        
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /cells:
+    get:
+      summary: Fetches all Cells
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_cells
+      tags:
+        - cells
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Add a new cell
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: add_cell
+      requestBody:
+        required: true
+        description: Path to CellList File
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+      responses:
+        '200':
+          description: Added new cell
+
+  /cells/{cell_id}/meta:
+    get:
+      summary: Fetches cell with cell_id
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_cell_with_id
+      tags:
+        - cells
+      parameters:
+      - name: cell_id
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cells/all/tests/{test_name}/meta:
+    get:
+      summary: Fetches tests of testname
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_test
+      tags:
+        - tests
+      parameters:
+      - name: test_name
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cells/all/tests/{test_name}/ts:
+    get:
+      summary: Fetches tests of testname
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_ts
+      tags:
+        - tests
+      parameters:
+      - name: test_name
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cells/{cell_id}/tests/{test_name}/ts:
+    get:
+      summary: Fetches tests of testname
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_test_ts_with_id
+      tags:
+        - tests
+      parameters:
+      - name: cell_id
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: test_name
+        in: path
+        description: Test Name of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cells/{cell_id}/tests/{test_name}/meta:
+    get:
+      summary: Fetches tests of testname
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_meta_with_id
+      tags:
+        - tests
+      parameters:
+      - name: cell_id
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: test_name
+        in: path
+        description: Test Name of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Path:
+      type: object
+      properties:
+        path:
+          type: string
+    Cell:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+        tag:
+          type: string
+    Cells:
+      type: array
+      items:
+        $ref: "#/components/schemas/Cell"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
