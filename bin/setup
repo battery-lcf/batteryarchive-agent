@@ -1,5 +1,10 @@
+#!/usr/bin/env bash
+
+## Grab the directory of the running script
+BIN_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 set -a
-source ./env
+source ${BIN_DIR}/../env
 set +a
 
 echo "Email: "
@@ -45,5 +50,12 @@ DATASOURCE_OPTIONS_JSON_STRING=$(printf "${DATASOURCE_OPTIONS_JSON_FMT}" ${POSTG
 echo "Adding Data source to Redash..."
 docker-compose run -d --rm server manage ds new --type pg --options ${DATASOURCE_OPTIONS_JSON_STRING} "battery_archive" 
 
+## Import the queries that we have in queries folder
+
+cd ${BIN_DIR}/../queries
+## Redash url is http://app:4000 This is from the docker compose file. 
+python3 query_import.py --api-key ${ADMIN_API_KEY} --redash-url http://app:4000
+
+cd ${BIN_DIR}
 echo "Setup Complete."
 
