@@ -24,7 +24,6 @@ def save_queries(url, api_key):
         if f.startswith('query_') and f.endswith('.sql'):
             start = f.index('_') + 1
             end = f.index('.')
-            query_id = f[start:end]
             path = "{}/api/queries".format(url)
             query_headers = get_headers(f)
             query_name = re.search("Name: (.+)", query_headers).group(1)
@@ -35,18 +34,23 @@ def save_queries(url, api_key):
             response = requests.post(path, headers=headers, data=json.dumps(payload))
             print(response.content)
             if(response.status_code == 200):
+                query_id = response.json()['id']
                 visualizations = get_visualization_str(f)
                 for viz in visualizations:
                     try:
                         payload = {
                             "query_id" : query_id,
-                            "type" : viz.type,
-                            "name" : viz.name,
-                            "options" : viz.options,
-                            "description" : viz.description
+                            "type" : viz['type'],
+                            "name" : viz['name'],
+                            "options" : viz['options'],
+                            "description" : viz['description']
                         }
+                        path = f"{url}/api/visualizations"
                         viz_response = requests.post(path, headers=headers, data=json.dumps(payload))
-                        print(f"Visualization added to query #{query_id} -- {payload}")
+                        if(viz_response.status_code != 200):
+                            print(f"There was an error adding this visualization. {viz_response.content}")
+                        else:
+                            print(f"Visualization added to query #{query_id} -- {payload}")
                     except KeyError as e:
                         print(e)
 
