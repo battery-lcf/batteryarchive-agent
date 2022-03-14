@@ -59,7 +59,7 @@ To see the data and visualization that you just importer, follow these steps.
 
 1. Go to http://your_server_ip:5000 and login using the email and password that you selected during the setup step
 2. Go to settings > Account and copy the API Key
-3. Import visualizations: python3 ./queries/query_import.py --api-key <API key> --redash-url 0.0.0.0:5000
+3. Import visualizations: python3 ./queries/query_import.py --api-key "API key" --redash-url 0.0.0.0:5000
 4. Click on queries
 
 ## Enable Jupyter Notebook
