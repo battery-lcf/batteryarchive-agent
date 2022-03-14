@@ -52,14 +52,15 @@ You are now ready to add data and use the site.
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes. 
 3. To import sample cycle data: ./scripts/add_data cycle_data.json  
 4. To import sample abuse data: ./scripts/add_data abuse_data.json
-5. To build visualizations: python3 query_import.py --api-key <your-key> --redash-url 0.0.0.0:500
 
 ## Populate your redash front end
 
 To see the data and visualization that you just importer, follow these steps.
 
 1. Go to http://your_server_ip:5000 and login using the email and password that you selected during the setup step
-2. Click on queries and browse the queries (TODO: build dashboards)
+2. Go to settings > Account and copy the API Key
+3. Import visualizations: python3 ./queries/query_import.py --api-key <API key> --redash-url 0.0.0.0:500
+4. Click on queries
 
 ## Enable Jupyter Notebook
 
