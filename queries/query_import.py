@@ -68,8 +68,8 @@ def get_visualization_str(filename):
         lines = f.readlines()
         vis_obj = {}
         for line in lines:
-            if line[:15] == "Visualizations: ":
-                vis_str = line[15:]
+            if "Visualizations" in line:
+                vis_str = line[15:].strip()
                 vis_obj = ast.literal_eval(vis_str)
 
                 for vis in vis_obj:
