@@ -44,6 +44,8 @@ After the start script completes, you will be given the URLs to access the vario
 2. JSON API endpoint at http://your_server_ip:4000
 3. A new folder on your computer named batteryarchive-agent
 
+To get a description of the API, look at the YAML file in api/api.yaml
+
 ## Final setup and data import
 
 You are now ready to add data and use the site.
@@ -61,7 +63,7 @@ To see the data and visualization that you just importer, follow these steps.
 2. Go to settings > Account and copy the API Key
 3. In the shell go to cd queries
 4. Import visualizations: python3 query_import.py --api-key API Key --redash-url http://0.0.0.0:5000
-5. Click on queries
+5. Click on queries (TODO)
 
 ## Enable Jupyter Notebook
 
