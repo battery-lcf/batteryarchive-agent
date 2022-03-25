@@ -20,6 +20,9 @@ def save_queries(url, api_key):
 
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     print(len(files), files)
+
+    saved_visualizations = {}
+
     for f in files:
         if f.startswith('query_') and f.endswith('.sql'):
             start = f.index('_') + 1
@@ -33,26 +36,31 @@ def save_queries(url, api_key):
             print(payload)
             response = requests.post(path, headers=headers, data=json.dumps(payload))
             print(response.content)
+            # If we were able to POST the query, get it's ID number
             if(response.status_code == 200):
                 query_id = response.json()['id']
-                visualizations = get_visualization_str(f)
-                for viz in visualizations:
-                    try:
-                        payload = {
-                            "query_id" : query_id,
-                            "type" : viz['type'],
-                            "name" : viz['name'],
-                            "options" : viz['options'],
-                            "description" : viz['description']
-                        }
-                        path = f"{url}/api/visualizations"
-                        viz_response = requests.post(path, headers=headers, data=json.dumps(payload))
-                        if(viz_response.status_code != 200):
-                            print(f"There was an error adding this visualization. {viz_response.content}")
-                        else:
-                            print(f"Visualization added to query #{query_id} -- {payload}")
-                    except KeyError as e:
-                        print(e)
+                # Save each of the visualizations so we can get to them later
+                saved_visualizations[query_id]= get_visualization_str(f)
+                if len(saved_visualizations) > 0:
+                    print(f"Saving visualizations from query {query_id}")
+
+    for query_id in saved_visualizations.keys():
+        try:
+            payload = {
+                "query_id" : query_id,
+                "type" : saved_visualizations[query_id]['type'],
+                "name" : saved_visualizations[query_id]['name'],
+                "options" : saved_visualizations[query_id]['options'],
+                "description" : saved_visualizations[query_id]['description']
+            }
+            path = f"{url}/api/visualizations"
+            viz_response = requests.post(path, headers=headers, data=json.dumps(payload))
+            if(viz_response.status_code != 200):
+                print(f"There was an error adding this visualization. {viz_response.content}")
+            else:
+                print(f"Visualization added to query #{query_id} -- {payload}")
+        except KeyError as e:
+            print(e)
 
 def get_query_str(filename):
     query = ''
