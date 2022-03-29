@@ -46,19 +46,20 @@ def save_queries(url, api_key):
 
     for query_id in saved_visualizations.keys():
         try:
-            payload = {
-                "query_id" : query_id,
-                "type" : saved_visualizations[query_id]['type'],
-                "name" : saved_visualizations[query_id]['name'],
-                "options" : saved_visualizations[query_id]['options'],
-                "description" : saved_visualizations[query_id]['description']
-            }
-            path = f"{url}/api/visualizations"
-            viz_response = requests.post(path, headers=headers, data=json.dumps(payload))
-            if(viz_response.status_code != 200):
-                print(f"There was an error adding this visualization. {viz_response.content}")
-            else:
-                print(f"Visualization added to query #{query_id} -- {payload}")
+            for viz in saved_visualizations[query_id]:
+                payload = {
+                    "query_id" : query_id,
+                    "type" : viz['type'],
+                    "name" : viz['name'],
+                    "options" : viz['options'],
+                    "description" : viz['description']
+                }
+                path = f"{url}/api/visualizations"
+                viz_response = requests.post(path, headers=headers, data=json.dumps(payload))
+                if(viz_response.status_code != 200):
+                    print(f"There was an error adding this visualization. {viz_response.content}")
+                else:
+                    print(f"Visualization added to query #{query_id} -- {payload}")
         except KeyError as e:
             print(e)
 
