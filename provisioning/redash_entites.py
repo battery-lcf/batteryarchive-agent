@@ -80,7 +80,7 @@ class Widget:
         return {
             "id" : self.id,
             "dashboard_id" : self.dashboard_id,
-            "visualization_id" : self.visualization.id,
+            "visualization_id" : self.visualization_id,
             "options" : self.options,
             "text" : self.text,
             "width" : self.width,
