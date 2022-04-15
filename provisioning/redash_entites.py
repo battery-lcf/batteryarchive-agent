@@ -34,6 +34,23 @@ class Query:
     options: Dict 
     query: str
     visualizations: List[Visualization]
+    data_source_id: int = 1
+
+    def change_id(self, new_id:int) -> int:
+        """Change the query ID of the query. 
+        Also changes the query_id of all children visualizations
+
+        Args:
+            new_id (int): new id of the query
+
+        Returns:
+            int: _description_
+        """
+        for viz in self.visualizations:
+            viz.query_id = new_id
+        self.id = new_id
+
+        return new_id
 
     def to_dict(self) -> Dict:
         return {
@@ -53,7 +70,7 @@ class Widget:
     """
     id: int                         # Widget ID
     dashboard_id: int               # Dashboard that the widget belongs to
-    visualization: Visualization    # The visualization used in the widget
+    visualization_id: int           # The visualization used in the widget
     width: int                      # Width of the widget
     options: Dict                   # Dictionary containing the widget options
     text: str                       # Contents of a text box
