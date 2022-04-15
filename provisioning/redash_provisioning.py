@@ -280,8 +280,6 @@ def import_dashboards(dashboards: List[Dashboard]):
 
             for viz in q.visualizations:
                 print(f"Importing {q.name} visualizations")
-                if viz.id in viz_lookup:
-                    continue
                 new_viz_id = post_visualization(viz)
                 viz.id = new_viz_id
                 viz_lookup[viz.id] = new_viz_id

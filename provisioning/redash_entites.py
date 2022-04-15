@@ -17,6 +17,7 @@ class Visualization:
 
     def to_dict(self) -> Dict:
         return{
+            "id" : self.id,
             "query_id" : self.query_id,
             "type" : self.type,
             "name" : self.name,
@@ -77,6 +78,7 @@ class Widget:
 
     def to_dict(self) -> Dict:
         return {
+            "id" : self.id,
             "dashboard_id" : self.dashboard_id,
             "visualization_id" : self.visualization.id,
             "options" : self.options,
