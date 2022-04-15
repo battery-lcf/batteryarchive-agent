@@ -37,10 +37,11 @@ class Query:
 
     def to_dict(self) -> Dict:
         return {
+            "id" : self.id,
             "data_source_id" : 1,
             "name" : self.name,
             "query" : self.query,
-            "visualizations" : self.visualizations,
+            "visualizations" : [x.to_dict() for x in self.visualizations],
             "options" : self.options
         }
 
@@ -76,9 +77,14 @@ class Dashboard:
     name: str               # Name of the Dashboard
     user_id: int            # User_ID associated with the dashboard. This will be 1 typically
     widgets: List[Widget]   # The widgets that go into the dashboard
+    queries: List[Query]
 
     def to_dict(self) -> Dict:
         return {
-            "name" : self.name
+            "name" : self.name,
+            "slug" : self.slug,
+            "user_id" : self.user_id,
+            "widgets" : [x.to_dict() for x in self.widgets],
+            "queries" : [x.to_dict() for x in self.queries],
         }
 
