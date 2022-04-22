@@ -47,8 +47,11 @@ class Query:
         Returns:
             int: _description_
         """
+        # Change the ID in the visualizations
         for viz in self.visualizations:
             viz.query_id = new_id
+
+        # Change the ID of the object                    
         self.id = new_id
 
         return new_id

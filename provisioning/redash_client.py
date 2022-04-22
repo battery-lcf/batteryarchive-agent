@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import requests
 import json
 
@@ -16,6 +16,27 @@ class RedashClient():
             'Authorization' : f'Key {redash_key}',
             'Content-Type' : 'application/json'
         }
+        
+        self.query_lookup = {}
+        self.visualization_lookup = {}
+
+    def lookup_old_queryID(self, new_query_id) -> int:
+        """Return the old Query ID of a Query that has been imported.
+        Note: 
+            This function will only look up values that have been 
+        Args:
+            new_query_ID (_type_): _description_
+
+        Returns:
+            int: Returns the old query ID of the inserted query. If new_query_id is not found
+                it will return None
+        """
+        ret_val = None
+        
+        if new_query_id in self.query_lookup:
+            ret_val = self.query_lookup[new_query_id]
+
+        return ret_val
 
     def create_new_dashboard(self, dashboard_name: str) -> int:
         """Create a new dashboard on the server
@@ -58,10 +79,38 @@ class RedashClient():
             print(f"There was an error inserting this query. {query_response.content}")
         else:
             ret_val = query_response.json()['id']
+            self.query_lookup[ret_val] = query_to_post.id
             print(f"Added query!")
         
         return ret_val
 
+    def update_query(self, query_id:int, query_to_update:Query) -> int:
+        """Update a given query. Note that this will overwrite a previous query so use carefully
+
+        Args:
+            query_id (int): Query ID to update
+            query_to_update (Query): Query Object to update with
+
+        Returns:
+            int: Query ID of the updated query
+        """
+        query_update_payload = {
+            'name' : query_to_update.name,
+            'query' : query_to_update.query,
+            'data_source_id' : query_to_update.data_source_id,
+            'options' : query_to_update.options,
+        }
+        query_response = requests.post(self.queries_path + f"/{query_id}", headers=self.headers,
+                data=query_update_payload)
+        ret_val = -1
+        if query_response.status_code != 200:
+            print(f"There was an error inserting this query. {query_response.content}")
+        else:
+            ret_val = query_response.json()['id']
+            print(f"Added query!")
+        
+        return ret_val
+    
     def post_visualization(self, viz_to_post:Visualization) -> int:
         """Post a visualization to the server given a Visualization
 
@@ -210,7 +259,61 @@ class RedashClient():
             
         return dashboards_list
 
-    def load_dashboards_from_file(self, file_name:str) -> List[Dashboard]:
+    def get_query(self, query_id) -> Query:
+        """Get a single query from the server
+
+        Args:
+            query_id (_type_): Query ID to retrieve from the server
+
+        Returns:
+            Query: Query Object populated from the server
+        """
+        query = None
+        try:
+            res = requests.get(self.queries_path+f"/{query_id}", headers=self.headers)
+            raw_query = res.json()
+            query = Query(id=raw_query['id'], name=raw_query['name'], options=raw_query['options'],
+                visualizations=None, query=raw_query['query'])
+            
+            visualiuzations = []
+            for viz in raw_query['visualizations']:
+                v = Visualization(id=viz['id'], name=viz['name'], type=viz['type'], 
+                        description=viz['description'], options=viz['options'], query_id=query.id)
+                visualiuzations.append(v)
+            query.visualizations = visualiuzations
+
+
+        except Exception as e:
+            raise(e)
+
+        return query
+
+    def get_all_queries(self) -> List[Query]:
+        """Get all the queries from the server
+
+        Returns:
+            List[Query]: List of queries retrieved from the server
+        """
+        queries_list = []
+        raw_queries:dict = {}
+        try:
+            res = requests.get(self.queries_path, headers=self.headers)
+            raw_queries = res.json()
+
+        except Exception as e:
+            print(e)
+
+
+        if len(raw_queries['results']) < 1:
+            return queries_list
+
+        for query in raw_queries['results']:
+            queries_list.append(self.get_query(query['id']))
+            
+            
+        return queries_list
+
+    def load_dashboards_from_file(self, file_name:str) -> Tuple[List[Dashboard], List[Query]]:
         """Load Dashboards from a specified file
 
         Args:
@@ -220,10 +323,13 @@ class RedashClient():
             List[Dashboard]: List of loaded Dashboards from provided JSON file.
         """
         dashboards_list = []
+        queries_list = []
         
         with open(file_name) as f:
-            dashboards_raw = f.read()
-            dashboards_json = json.loads(dashboards_raw)
+            raw_file = f.read()
+            raw_json = json.loads(raw_file)
+            dashboards_json = raw_json['dashboards_array']
+            queries_json = raw_json['queries_array']
 
             for dash in dashboards_json:
                 queries = []
@@ -233,40 +339,66 @@ class RedashClient():
                 for query in dash['queries']:
 
                     for viz in query['visualizations']:
-                        v = Visualization(id=None, name=viz['name'], type=viz['type'], 
-                                description=viz['description'], options=viz['options'], query_id=query['id'])
+                        v = Visualization(
+                            id=None, 
+                            name=viz['name'], 
+                            type=viz['type'], 
+                            description=viz['description'], 
+                            options=viz['options'], 
+                            query_id=query['id'])
                         visualizations.append(v)
 
-                    q = Query(id=query['id'], name=query['name'], options=query['options'], 
-                            visualizations=visualizations, query=query['query'])
+                    q = Query(
+                            id=query['id'], 
+                            name=query['name'], 
+                            options=query['options'], 
+                            visualizations=visualizations, 
+                            query=query['query'])
                     queries.append(q)
                 
                 for widget in dash['widgets']:
-                    w = Widget(id=None, dashboard_id=widget['dashboard_id'], text=widget['text'], 
-                            visualization_id=widget['visualization_id'], width=widget['width'], options=widget['options'])
+                    w = Widget(
+                            id=None, 
+                            dashboard_id=widget['dashboard_id'], 
+                            text=widget['text'], 
+                            visualization_id=widget['visualization_id'], 
+                            width=widget['width'], 
+                            options=widget['options'])
                     widgets.append(w)
 
-                d = Dashboard(id=None, slug=dash['slug'], name=dash['name'], user_id=dash['user_id'],
-                        widgets=widgets, queries=queries)
+                d = Dashboard(
+                            id=None, 
+                            slug=dash['slug'], 
+                            name=dash['name'], 
+                            user_id=dash['user_id'],
+                            widgets=widgets, 
+                            queries=queries)
                 dashboards_list.append(d)
+                print("Loaded in the dashboards")
+            
+            for query in queries_json:
+                q = Query(id=query['id'], name=query['name'], options=query['options'], 
+                        visualizations=visualizations, query=query['query'])
+                queries_list.append(q)
 
-        print("Loaded in the dashboards")
+        return (dashboards_list, queries_list)
 
-        return dashboards_list
-
-    def save_dashboards_to_file(self, file_name:str, dashboards:List[Dashboard]) -> None:
+    def save_dashboards_to_file(self, file_name:str, dashboards:List[Dashboard], queries:List[Query]) -> None:
         """Save dashboards as JSON 
 
         Args:
             file_name (str): File name to save as JSON
         """
-        dashboards_array = [x.to_dict() for x in dashboards]
+        export_file = {
+            "queries_array" : [x.to_dict() for x in queries],
+            "dashboards_array" : [x.to_dict() for x in dashboards] 
+        }
         with open(file_name, "w") as f:
-            dump = json.dumps(dashboards_array)
+            dump = json.dumps(export_file)
             f.write(dump)
 
 
-    def import_dashboards(self, dashboards: List[Dashboard]):
+    def import_dashboards(self, dashboards: List[Dashboard], queries: List[Query]):
         """Import dashboards into the server
 
         Args:
