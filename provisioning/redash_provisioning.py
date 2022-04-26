@@ -24,6 +24,7 @@ def import_dashboards(file_name, redash_url, redash_key):
     priority_queries = {}
 
     imported_query_lookup = {}
+    imported_visualization_lookup = {}
 
     #### Import all of the queries
     # Find all of the queries that rely on a Query. We want to remember which queries depend on what.
@@ -75,14 +76,22 @@ def import_dashboards(file_name, redash_url, redash_key):
         # Working through the visualizations
         for vis in q.visualizations:
             # Update the query id before sending it up
-            vis.query_id = updated_query
-            client.post_visualization(vis)
-
-
-    ## Import all of the visualizations
-
+            vis.query_id = uploaded_query_id
+            new_vis_id = client.post_visualization(vis)
+            imported_visualization_lookup[vis.id] = new_vis_id
             
-    client.import_dashboards(loaded_dashboards)
+    ## Import all of the dashboards
+    for d in loaded_dashboards:
+        uploaded_dashboard_id = client.create_new_dashboard(d.name)
+        
+        for w in d.widgets:
+            w.dashboard_id = uploaded_dashboard_id
+            old_vis_id = w.visualization_id
+            # Not all widgets have a visualization ID 
+            if w.visualization_id is not None:
+                w.visualization_id = imported_visualization_lookup.get(old_vis_id)
+            client.post_widget(w)
+                    
     
 
 @click.command()
