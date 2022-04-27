@@ -61,12 +61,12 @@ def import_dashboards(file_name, redash_url, redash_key):
             for param in q.options['parameters']:
                 if param['type'] == 'query':
                     # Replace the queryId that was previously relied on, and update it
-                    id_2b_replaced = q.options['parameters']['queryId']
+                    id_2b_replaced = param['queryId']
                     replaced_id = imported_query_lookup.get(id_2b_replaced) 
                     if replaced_id is None:
                         print(f"ERROR HERE!!! {q}")
                         continue
-                    q.options['parameters']['queryId'] = replaced_id
+                    param['queryId'] = replaced_id
 
                     updated_query = True
         # If a query depended on another query, we've updated the relevant options
