@@ -101,13 +101,13 @@ class RedashClient():
             'options' : query_to_update.options,
         }
         query_response = requests.post(self.queries_path + f"/{query_id}", headers=self.headers,
-                data=query_update_payload)
+                data=json.dumps(query_update_payload))
         ret_val = -1
         if query_response.status_code != 200:
             print(f"There was an error inserting this query. {query_response.content}")
         else:
             ret_val = query_response.json()['id']
-            print(f"Added query!")
+            print(f"Updated query!")
         
         return ret_val
     
