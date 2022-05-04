@@ -96,16 +96,17 @@ class Query:
             Query: Query object 
         """
         visualizations = []
+
         for v in query_dict['visualizations']:
             viz_obj = Visualization.from_dict(v)
             visualizations.append(viz_obj)
 
         return cls(
-            id=query_dict['id'],
-            name=query_dict['name'],
-            query=query_dict['query'],
+            id=query_dict.get('id'),
+            name=query_dict.get('name'),
+            query=query_dict.get('query'),
             visualizations=visualizations,
-            options=query_dict['options']
+            options=query_dict.get('options')
         )
 
 
@@ -131,6 +132,17 @@ class Widget:
             "width" : self.width,
         }
 
+    @classmethod
+    def from_dict(cls, widget_dict: Dict):
+        return cls(
+            id=widget_dict.get("id"),
+            dashboard_id=widget_dict.get("dashboard_id"),
+            visualization_id=widget_dict.get("visualization_id"),
+            width=widget_dict.get("width"),
+            options=widget_dict.get("options"),
+            text=widget_dict.get("text")
+        )
+
 @dataclass
 class Dashboard:
     """ 
@@ -151,4 +163,15 @@ class Dashboard:
             "widgets" : [x.to_dict() for x in self.widgets],
             "queries" : [x.to_dict() for x in self.queries],
         }
+
+    @classmethod
+    def from_dict(cls, dashboard_dict:Dict):
+        return cls(
+            id=dashboard_dict.get("id"),
+            slug=dashboard_dict.get("slug"),
+            name=dashboard_dict.get("name"),
+            user_id=dashboard_dict.get("user_id"),
+            widgets=dashboard_dict.get("widgets"),
+            queries=dashboard_dict.get("queries")
+        )
 
