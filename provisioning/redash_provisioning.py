@@ -1,5 +1,4 @@
 from typing import Dict
-from numpy import require
 import click
 from redash_client import RedashClient
 
@@ -22,7 +21,7 @@ def import_dashboards(file_name, redash_url, redash_key):
     client = RedashClient(redash_key=redash_key, redash_url=redash_url)
     loaded_dashboards, loaded_queries = client.load_dashboards_from_file(file_name)
     priority_queries = {}
-
+  
     imported_query_lookup = {}
     imported_visualization_lookup = {}
 

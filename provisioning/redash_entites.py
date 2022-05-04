@@ -1,6 +1,8 @@
 
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List 
+from typing import Dict, List
+from numpy import VisibleDeprecationWarning 
 
 
 @dataclass
@@ -24,6 +26,18 @@ class Visualization:
             "options" : self.options,
             "description" : self.description
         }
+    
+    @classmethod
+    def from_dict(cls, viz_dict) -> Visualization:
+        return cls(
+            id=viz_dict['id'],
+            query_id=viz_dict['query_id'],
+            type=viz_dict['type'],
+            name=viz_dict['name'],
+            options=viz_dict['options'],
+            description=viz_dict['description']
+        )
+
 
 @dataclass
 class Query:
@@ -57,6 +71,11 @@ class Query:
         return new_id
 
     def to_dict(self) -> Dict:
+        """Return a dictionary representation of the query. Currently sets data_source_id to 1
+
+        Returns:
+            Dict: Query dictionary. 
+        """
         return {
             "id" : self.id,
             "data_source_id" : 1,
@@ -65,6 +84,29 @@ class Query:
             "visualizations" : [x.to_dict() for x in self.visualizations],
             "options" : self.options
         }
+
+    @classmethod
+    def from_dict(cls, query_dict:Dict) -> Query:
+        """Return a Query from a provided dict
+
+        Args:
+            query_dict (dict): Query dictiornary as returned from the API
+
+        Returns:
+            Query: Query object 
+        """
+        visualizations = []
+        for v in query_dict['visualizations']:
+            viz_obj = Visualization.from_dict(v)
+            visualizations.append(viz_obj)
+
+        return cls(
+            id=query_dict['id'],
+            name=query_dict['name'],
+            query=query_dict['query'],
+            visualizations=visualizations,
+            options=query_dict['options']
+        )
 
 
 @dataclass
