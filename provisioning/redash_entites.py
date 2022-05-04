@@ -2,7 +2,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List
-from numpy import VisibleDeprecationWarning 
 
 
 @dataclass
@@ -18,6 +17,11 @@ class Visualization:
     query_id: int
 
     def to_dict(self) -> Dict:
+        """Creates a dictionary representation of a Visualization instance
+
+        Returns:
+            Dict: Dictonary representation of the Visualization instance
+        """
         return{
             "id" : self.id,
             "query_id" : self.query_id,
@@ -29,6 +33,14 @@ class Visualization:
     
     @classmethod
     def from_dict(cls, viz_dict) -> Visualization:
+        """Create a Visualization from a provided dictionary
+
+        Args:
+            viz_dict (_type_): Dictionary visualization as returned from the Redash API
+
+        Returns:
+            Visualization: Instance of Visualization data class 
+        """
         return cls(
             id=viz_dict['id'],
             query_id=viz_dict['query_id'],
@@ -123,6 +135,11 @@ class Widget:
     text: str                       # Contents of a text box
 
     def to_dict(self) -> Dict:
+        """Return a dictionary representation of the Widget instance
+
+        Returns:
+            Dict: Dictionary represetnation of the calling Widget instance.
+        """
         return {
             "id" : self.id,
             "dashboard_id" : self.dashboard_id,
@@ -133,7 +150,15 @@ class Widget:
         }
 
     @classmethod
-    def from_dict(cls, widget_dict: Dict):
+    def from_dict(cls, widget_dict: Dict) -> Widget:
+        """Return a Widget from a provided dict
+
+        Args:
+            widget_dict (dict): Widget dictiornary as returned from the API
+
+        Returns:
+            Widget: Widget object 
+        """
         return cls(
             id=widget_dict.get("id"),
             dashboard_id=widget_dict.get("dashboard_id"),
@@ -156,6 +181,11 @@ class Dashboard:
     queries: List[Query]
 
     def to_dict(self) -> Dict:
+        """Returns a dictionary representation of the Dashboard instance
+
+        Returns:
+            Dict: Dict of the calling Dashboard instance
+        """
         return {
             "name" : self.name,
             "slug" : self.slug,
@@ -165,7 +195,15 @@ class Dashboard:
         }
 
     @classmethod
-    def from_dict(cls, dashboard_dict:Dict):
+    def from_dict(cls, dashboard_dict:Dict) -> Dashboard:
+        """Return a Dashboard from a provided dict
+
+        Args:
+            dashboard_dict (dict): Dashboard dictiornary as returned from the API
+
+        Returns:
+            Dashboard: Dashboard object 
+        """
         return cls(
             id=dashboard_dict.get("id"),
             slug=dashboard_dict.get("slug"),
