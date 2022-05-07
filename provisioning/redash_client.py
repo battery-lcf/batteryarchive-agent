@@ -340,7 +340,7 @@ class RedashClient():
 
                     for viz in query['visualizations']:
                         v = Visualization(
-                            id=None, 
+                            id=viz['id'], 
                             name=viz['name'], 
                             type=viz['type'], 
                             description=viz['description'], 
@@ -358,7 +358,7 @@ class RedashClient():
                 
                 for widget in dash['widgets']:
                     w = Widget(
-                            id=None, 
+                            id=widget['id'], 
                             dashboard_id=widget['dashboard_id'], 
                             text=widget['text'], 
                             visualization_id=widget['visualization_id'], 
@@ -377,6 +377,9 @@ class RedashClient():
                 print("Loaded in the dashboards")
             
             for query in queries_json:
+                visualizations = []
+                for viz in query['visualizations']:
+                    visualizations.append(Visualization.from_dict(viz))
                 q = Query(id=query['id'], name=query['name'], options=query['options'], 
                         visualizations=visualizations, query=query['query'])
                 queries_list.append(q)
