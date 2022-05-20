@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import requests
 import json
 
@@ -258,8 +258,50 @@ class RedashClient():
             
             
         return dashboards_list
+        
 
-    def get_query(self, query_id) -> Query:
+    def refresh_query_results(self, query_id:int, params:Dict) -> None:
+        """_summary_
+
+        Args:
+            query_id (int): _description_
+            params (Dict): _description_
+        """
+        try:
+            res = requests.post(self.queries_path+f"/{query_id}/results", 
+                                    headers=self.headers, params=params)
+            if(res.status_code != 200):
+                print(f"Error refreshing the query: {res.content}")
+            raw_query = res.json()
+            query_result = json.dumps(raw_query)
+
+        except Exception as e:
+            raise(e)
+
+        return query_result
+
+
+    def get_query_results(self, query_id:int) -> Dict:
+        """Get the result
+
+        Args:
+            query_id (int)
+        
+        """
+        query_result = {}
+        try:
+            res = requests.get(self.queries_path+f"/{query_id}/results", headers=self.headers)
+            if(res.status_code != 200):
+                print(f"Error refreshing the query: {res.content}")
+            raw_query = res.json()
+            query_result = json.dumps(raw_query)
+
+        except Exception as e:
+            raise(e)
+
+        return query_result
+
+    def get_query(self, query_id:int) -> Query:
         """Get a single query from the server
 
         Args:
@@ -297,7 +339,8 @@ class RedashClient():
         queries_list = []
         raw_queries:dict = {}
         try:
-            res = requests.get(self.queries_path, headers=self.headers)
+            # TODO Create real pagination here
+            res = requests.get(self.queries_path+"?page_size=100", headers=self.headers)
             raw_queries = res.json()
 
         except Exception as e:
