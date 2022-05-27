@@ -13,6 +13,9 @@ read -r DEFAULT_EMAIL
 echo "Password: "
 read -s ADMIN_PASSWORD
 
+echo "DEFAULT_EMAIL=$DEFAULT_EMAIL" >> env
+echo "ADMIN_PASSWORD=$ADMIN_PASSWORD" >> env
+
 echo "Creating DB..."
 docker-compose run --rm server create_db
 
