@@ -81,7 +81,7 @@ services:
     links:
       - "ds-postgres:ds-postgres"
   app:
-    image: batteryarchive/service
+    image: batteryarchive/service:latest # TODO -> Track a specific version of the service
     ports:
       - "4000:4000"
     env_file: ./env
