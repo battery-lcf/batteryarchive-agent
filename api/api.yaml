@@ -62,23 +62,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-    post:
-      summary: Add a new cell
-      x-openapi-router-controller: app.controllers.cell_controller
-      operationId: add_cell
-      requestBody:
-        required: true
-        description: Path to CellList File
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                path:
-                  type: string
-      responses:
-        '200':
-          description: Added new cell
 
   /cells/{cell_id}/meta:
     get:
@@ -229,6 +212,48 @@ paths:
       summary: Fetches tests of testname
       x-openapi-router-controller: app.controllers.cell_controller
       operationId: get_meta_with_id
+      tags:
+        - tests
+      parameters:
+      - name: cell_id
+        in: path
+        description: Cell ID of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: test_name
+        in: path
+        description: Test Name of the resource to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paged array of cells
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Cells"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cells/{cell_id}/tests/{test_name}/stats:
+    get:
+      summary: Fetches tests of testname
+      x-openapi-router-controller: app.controllers.cell_controller
+      operationId: get_stats_with_id
       tags:
         - tests
       parameters:
