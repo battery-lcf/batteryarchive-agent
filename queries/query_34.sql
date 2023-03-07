@@ -1,8 +1,9 @@
 /*
-Name: Filters: C charge Rate
+Name: Filters: Source abuse test
 Data source: 1
 Created By: admin
-Last Update At: 2022-03-05T20:37:57.794Z
-Visualizations: [{'id': 38, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-02-27T21:57:15.860Z', 'created_at': '2022-02-27T21:57:15.860Z'}]
+Last Update At: 2022-10-18T21:14:56.553Z
+Visualizations: [{'id': 80, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-10-18T21:12:38.472Z', 'created_at': '2022-10-18T21:12:38.472Z'}, {'id': 81, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-10-18T21:12:38.472Z', 'created_at': '2022-10-18T21:12:38.472Z'}]
 */
-select distinct crate_c as a, count(*) from cycle_metadata group by a order by a
+
+select distinct source as a, count(*) from cell_metadata where test = 'abuse' group by a order by a 

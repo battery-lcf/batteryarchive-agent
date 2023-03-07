@@ -1047,14 +1047,15 @@ def add_ts_md_abuse(cell_list, conn, save, plot, path, slash):
 
         print("tester=" + tester)
 
-        #if tester=='ORNL-Servo-Motor':
-        print("CELL=" + cell_id)
-        df_abuse_ts = read_ornlabuse(file_path, cell_id)
-        #if tester=='SNL-Hydraulic':
-        #df_abuse_ts = read_snlabuse(file_path, cell_id)
+        if tester=='ORNL-Servo-Motor':
+            print("ORNL CELL=" + cell_id)
+            df_abuse_ts = read_ornlabuse(file_path, cell_id)
+        if tester=='SNL-Hydraulic':
+            print("SNL CELL=" + cell_id)
+            df_abuse_ts = read_snlabuse(file_path, cell_id)
        
         if not df_abuse_ts.empty:
-            #df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
+            df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
             df_abuse_ts.to_sql('abuse_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
             
 
@@ -1085,6 +1086,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
 
         # check if the cell is already there and report status
 
+        print(conn)
         status = check_cell_status(cell_id, conn)
 
         if status=="completed":
@@ -1211,34 +1213,61 @@ def generate_cycle_data(cell_id, conn, path):
     df.to_csv(csv, encoding='utf-8', index=False)
 
 
-# generate csv files with time series data
 def generate_timeseries_data(cell_id, conn, path):
 
     # generate timeseries data
 
     logging.info('export cell timeseries data to csv files')
 
-    sql_str = """select 
-          date_time as "Date_Time",
-          round(test_time,3) as "Test_Time (s)", 
-          cycle_index as "Cycle_Index", 
-          round(i,3) as "Current (A)",
-          round(v,3) as "Voltage (V)",
-          round(ah_c,3) as "Charge_Capacity (Ah)", 
-          round(ah_d,3) as "Discharge_Capacity (Ah)", 
-          round(e_c,3) as "Charge_Energy (Wh)", 
-          round(e_d,3) as "Discharge_Energy (Wh)",
-          round(env_temperature,3) as "Environment_Temperature (C)",
-          round(cell_temperature,3) as "Cell_Temperature (C)"
-      from cycle_timeseries where cell_id='""" + cell_id + """' order by test_time"""
+    status = 'exporting'
 
-    print(sql_str)
+    set_cell_status(cell_id, status, conn)
 
-    df = pd.read_sql(sql_str, conn)
+    block_size = 30
 
-    cell_id_to_file = cell_id.replace(r'/', '-')
-    csv = path + cell_id_to_file + '_timeseries_data.csv'
-    df.to_csv(csv, encoding='utf-8', index=False)
+    cycle_index_max = get_cycle_index_max(cell_id, conn)
+
+    print("max cycle: " + str(cycle_index_max))
+
+    start_cycle = 1
+    create_file = True 
+
+    for i in range(cycle_index_max+1):
+                
+        if (i-1) % block_size == 0 and i > 0:
+
+            start_cycle = i
+            end_cycle = start_cycle + block_size - 1
+
+            sql_cell =  " cell_id='" + cell_id + "'" 
+            sql_cycle = " and cycle_index>=" + str(start_cycle) + " and cycle_index<=" + str(end_cycle) + " "
+
+            sql_str = """select 
+                date_time as "Date_Time",
+                round(test_time,3) as "Test_Time (s)", 
+                cycle_index as "Cycle_Index", 
+                round(i,3) as "Current (A)",
+                round(v,3) as "Voltage (V)",
+                round(ah_c,3) as "Charge_Capacity (Ah)", 
+                round(ah_d,3) as "Discharge_Capacity (Ah)", 
+                round(e_c,3) as "Charge_Energy (Wh)", 
+                round(e_d,3) as "Discharge_Energy (Wh)",
+                round(env_temperature,3) as "Environment_Temperature (C)",
+                round(cell_temperature,3) as "Cell_Temperature (C)"
+                from cycle_timeseries where """ + sql_cell + sql_cycle + """
+                order by test_time"""
+
+            print(sql_str)
+
+            df = pd.read_sql(sql_str, conn)
+
+            cell_id_to_file = cell_id.replace(r'/', '-')
+            csv = path + cell_id_to_file + '_timeseries_data.csv'
+            if create_file:
+                df.to_csv(csv, encoding='utf-8', index=False)
+                create_file = False
+            else:
+                df.to_csv(csv, mode='a', index=False, header=False)
 
 
 # generate csv files with time series and cycle data
@@ -1394,11 +1423,7 @@ def main(argv):
     plot = data['environment']['PLOT']
     save = data['environment']['SAVE']
     style = data['environment']['STYLE']
-
-    # use default if env file not there
-    if conn == '':
-        conn = data['environment']['DATABASE_CONNECTION']
-
+    
     logging.info('command line: ' + str(opts))
     logging.info('configuration: ' + str(data))
 

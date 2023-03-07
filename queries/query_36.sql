@@ -1,8 +1,14 @@
 /*
-Name: Filters: Indentor
+Name: Validate cycle test time series
 Data source: 1
 Created By: admin
-Last Update At: 2022-03-12T16:40:36.205Z
-Visualizations: [{'id': 42, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-03-12T16:39:53.887Z', 'created_at': '2022-03-12T16:39:53.887Z'}]
+Last Update At: 2022-12-31T13:52:53.963Z
+Visualizations: [{'id': 84, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-11-18T15:38:39.599Z', 'created_at': '2022-11-18T15:38:39.599Z'}, {'id': 85, 'type': 'CHART', 'name': 'Chart', 'description': '', 'options': {'globalSeriesType': 'scatter', 'sortX': True, 'legend': {'enabled': True, 'placement': 'auto', 'traceorder': 'normal'}, 'xAxis': {'type': '-', 'labels': {'enabled': True}}, 'yAxis': [{'type': 'linear'}, {'type': 'linear', 'opposite': True}], 'alignYAxesAtZero': False, 'error_y': {'type': 'data', 'visible': True}, 'series': {'stacking': None, 'error_y': {'type': 'data', 'visible': True}}, 'seriesOptions': {'UL-PUR_CF10OV1C-2_pouch_NCA_25C_0-100_1/1C_h 10.0': {'yAxis': 0, 'type': 'scatter'}, 'i': {'yAxis': 0, 'type': 'scatter'}}, 'valuesOptions': {}, 'columnMapping': {'test_time': 'x', 'v': 'y', 'i': 'y'}, 'direction': {'type': 'counterclockwise'}, 'sizemode': 'diameter', 'coefficient': 1, 'numberFormat': '0,0[.]00000', 'percentFormat': '0[.]00%', 'textFormat': '', 'missingValuesAsZero': True, 'showDataLabels': False, 'dateTimeFormat': 'DD/MM/YY HH:mm', 'swappedAxes': False}, 'updated_at': '2022-12-30T18:52:39.557Z', 'created_at': '2022-11-18T15:39:00.923Z'}, {'id': 95, 'type': 'CHART', 'name': 'Chart', 'description': '', 'options': {'globalSeriesType': 'scatter', 'sortX': True, 'legend': {'enabled': True, 'placement': 'auto', 'traceorder': 'normal'}, 'xAxis': {'type': '-', 'labels': {'enabled': True}}, 'yAxis': [{'type': 'linear'}, {'type': 'linear', 'opposite': True}], 'alignYAxesAtZero': False, 'error_y': {'type': 'data', 'visible': True}, 'series': {'stacking': None, 'error_y': {'type': 'data', 'visible': True}}, 'seriesOptions': {'v': {'yAxis': 1, 'type': 'scatter'}, 'i': {'yAxis': 1, 'type': 'scatter'}}, 'valuesOptions': {}, 'columnMapping': {'test_time': 'x', 'ah_c': 'y', 'ah_d': 'y', 'i': 'y'}, 'direction': {'type': 'counterclockwise'}, 'sizemode': 'diameter', 'coefficient': 1, 'numberFormat': '0,0[.]00000', 'percentFormat': '0[.]00%', 'textFormat': '', 'missingValuesAsZero': True, 'showDataLabels': False, 'dateTimeFormat': 'DD/MM/YY HH:mm', 'swappedAxes': False}, 'updated_at': '2022-12-31T14:04:38.875Z', 'created_at': '2022-12-31T13:52:53.963Z'}]
 */
-select distinct indentor as a, count(*) from abuse_metadata group by a order by a
+
+SELECT t.*
+FROM (
+  SELECT cell_id, cycle_index, test_time, cycle_time, ah_d, e_d, ah_c, e_c, v, i, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row
+  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}}) 
+) t
+WHERE t.row % (select step from cycle_metadata where cell_id = t.cell_id) = 0  

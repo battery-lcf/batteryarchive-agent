@@ -1,0 +1,8 @@
+# This configuration file is for the python scripts in the battery-lfc framework.
+# For a production example please refer to the https://github.com/battery-lcf repository on GitHub.
+version: "0.1"
+
+environment:
+  STYLE: 'unix'
+  PLOT: False
+  SAVE: True

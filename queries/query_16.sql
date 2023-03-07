@@ -1,9 +1,9 @@
 /*
-Name: Abuse Test DD
+Name: Filters: Initial Voltage
 Data source: 1
 Created By: admin
-Last Update At: 2022-03-05T20:38:22.126Z
-Visualizations: [{'id': 20, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-02-27T21:57:11.495Z', 'created_at': '2022-02-27T21:57:11.495Z'}]
+Last Update At: 2022-05-31T21:06:00.412Z
+Visualizations: [{'id': 16, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-05-31T19:26:02.568Z', 'created_at': '2022-05-31T19:26:02.568Z'}, {'id': 36, 'type': 'TABLE', 'name': 'Table', 'description': '', 'options': {}, 'updated_at': '2022-05-31T19:26:03.660Z', 'created_at': '2022-05-31T19:26:03.660Z'}]
 */
 
-select cell_id from abuse_metadata order by cell_id
+select distinct v_init as a, count(*) from abuse_metadata group by a order by a
