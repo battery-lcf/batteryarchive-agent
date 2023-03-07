@@ -1,0 +1,25 @@
+echo "██████╗  █████╗ ████████╗████████╗███████╗██████╗ ██╗   ██╗"
+echo "██╔══██╗██╔══██╗╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗╚██╗ ██╔╝"
+echo "██████╔╝███████║   ██║      ██║   █████╗  ██████╔╝ ╚████╔╝ "
+echo "██╔══██╗██╔══██║   ██║      ██║   ██╔══╝  ██╔══██╗  ╚██╔╝  "
+echo "██████╔╝██║  ██║   ██║      ██║   ███████╗██║  ██║   ██║   "
+echo "╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝   "
+echo ""                                                          
+echo " █████╗ ██████╗  ██████╗██╗  ██╗██╗██╗   ██╗███████╗       "
+echo "██╔══██╗██╔══██╗██╔════╝██║  ██║██║██║   ██║██╔════╝       "
+echo "███████║██████╔╝██║     ███████║██║██║   ██║█████╗         "
+echo "██╔══██║██╔══██╗██║     ██╔══██║██║╚██╗ ██╔╝██╔══╝         "
+echo "██║  ██║██║  ██║╚██████╗██║  ██║██║ ╚████╔╝ ███████╗       "
+echo "╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═══╝  ╚══════╝       "
+echo "==========================================================="
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+echo "Generating env"
+${SCRIPT_DIR}/gen_env  
+echo "Finished generating env"
+echo "Running Setup"
+${SCRIPT_DIR}/setup
+echo "Fnished running setup"
+echo "Starting the containers"
+${SCRIPT_DIR}/start
+echo "Containers have been started. Importing querites"
+${SCRIPT_DIR}/import_queries
