@@ -19,7 +19,7 @@ echo "POSTGRES_DB=postgres" >> env
 
 echo "REDASH_DATABASE_URL=$REDASH_DATABASE_URL" >> env
 echo "DATABASE_CONNECTION=$DATABASE_CONNECTION" >> env
-
+echo "LOCAL_CONNECTION=$LOCAL_CONNECTION" >> env
 
 
 echo "done."
