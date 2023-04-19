@@ -1383,7 +1383,7 @@ def main(argv):
         x = env.split(" ")
         for i in x:
             j = i.split("=")
-            if j[0] == 'DATABASE_CONNECTION':
+            if j[0] == 'LOCAL_CONNECTION':
                 conn =  j[1]
     except:
         print("Error opening env file:", sys.exc_info()[0])
