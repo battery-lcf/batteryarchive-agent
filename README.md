@@ -41,7 +41,7 @@ When you run the setup script, you will be asked to enter an email and create a 
 
 After the start script completes, you will be given the URLs to access the various components of the batteryarchive agent. You will have access to:
 
-1. Redash interface at http://your_server_ip:5000
+1. Redash interface at http://your_server_ip
 2. JSON API endpoint at http://your_server_ip:4000
 3. A new folder on your computer named batteryarchive-agent
 
@@ -53,18 +53,12 @@ You are now ready to add data and use the site.
 
 1. In the batteryarchive-agent folder, run pip3 install -r requirements.txt 
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes. 
-3. To import sample cycle data: ./scripts/add_data cycle_data.json  
-4. To import sample abuse data: ./scripts/add_data abuse_data.json
+3. To import sample cycle data: python3 data_import_agent.py -t cycle -m add -p ../data/cycle/  
+4. To import sample abuse data: python3 data_import_agent.py -t abuse -m add -p ../data/abuse/
 
 ## Populate your redash front end
 
-To see the data and visualization that you just importer, follow these steps.
-
-1. Go to http://your_server_ip:5000 and login using the email and password that you selected during the setup step
-2. Go to settings > Account and copy the API Key
-3. In the shell go to cd queries
-4. Import visualizations: python3 query_import.py --api-key API Key --redash-url http://0.0.0.0:5000
-5. Click on queries (TODO)
+To see the data and visualization that you just importer, follow these steps (TODO).
 
 ## Enable Jupyter Notebook
 
