@@ -58,7 +58,12 @@ You are now ready to add data and use the site.
 
 ## Populate your redash front end
 
-To see the data and visualization that you just importer, follow these steps (TODO).
+To see the data and visualization that you just importer, login in the redaash admin interface and access the Queries page. Runs the queries in the order listed below. To run a query, click on it and then click on the blue arrow square in the bottom-right corner of the page. If the import was successful, data will appear in the Table section of the query page after you run it. 
+
+1. Run all the queries that start with Filter
+2. Run the queries that end with DD 
+3. Run the queries that end with List
+
 
 ## Enable Jupyter Notebook
 
