@@ -43,7 +43,8 @@ After the start script completes, you will be given the URLs to access the vario
 
 1. Redash interface at http://your_server_ip
 2. JSON API endpoint at http://your_server_ip:4000
-3. A new folder on your computer named batteryarchive-agent
+3. The AP definitions at http://your_server_ip:1080
+4. A new folder on your computer named batteryarchive-agent
 
 To get a description of the API, look at the YAML file in api/api.yaml
 
@@ -51,10 +52,11 @@ To get a description of the API, look at the YAML file in api/api.yaml
 
 You are now ready to add data and use the site.
 
-1. In the batteryarchive-agent folder, run pip3 install -r requirements.txt 
-2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes. 
-3. To import sample cycle data: python3 data_import_agent.py -t cycle -m add -p ../data/cycle/  
-4. To import sample abuse data: python3 data_import_agent.py -t abuse -m add -p ../data/abuse/
+1. In the batteryarchive-agent folder, run: pip3 install -r requirements.txt 
+2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes.
+3. cd scripts 
+4. To import sample cycle data: python3 data_import_agent.py -t cycle -m add -p ../data/cycle/  
+5. To import sample abuse data: python3 data_import_agent.py -t abuse -m add -p ../data/abuse/
 
 ## Populate your redash front end
 
