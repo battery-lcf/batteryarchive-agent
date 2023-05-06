@@ -260,7 +260,8 @@ def read_timeseries_arbin(cell_id, file_path):
                     if df_tmerge.empty:
                         df_tmerge = df_time_series
                     else:
-                        df_tmerge = df_tmerge.append(df_time_series, ignore_index=True)
+                        ##df_tmerge = df_tmerge.append(df_time_series, ignore_index=True)
+                        df_tmerge = pd.concat([df_time_series, df_tmerge], ignore_index=True)
 
     return df_tmerge
 
@@ -965,10 +966,13 @@ def read_ornlabuse(file_path, cell_id):
 
         if df_tmerge.empty:
             df_tmerge = df_ts_a
-            df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
+            ##df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
+            df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
         else:
-            df_tmerge = df_tmerge.append(df_ts_a, ignore_index=True)
-            df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
+            ##df_tmerge = df_tmerge.append(df_ts_a, ignore_index=True)
+            ##df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
+            df_tmerge = pd.concat([df_tmerge, df_ts_a], ignore_index=True)
+            df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
 
     df_tmerge['cell_id'] = cell_id
 
@@ -1004,7 +1008,8 @@ def read_snlabuse(file_path, cell_id):
         if df_tmerge.empty:
             df_tmerge = df_ts
         else:
-            df_tmerge = df_tmerge.append(df_ts, ignore_index=True)
+            ##df_tmerge = df_tmerge.append(df_ts, ignore_index=True)
+            df_tmerge = pd.concat([df_tmerge, df_ts], ignore_index=True)
 
     df_tmerge['cell_id'] = cell_id
 
