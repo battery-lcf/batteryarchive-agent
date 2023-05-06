@@ -1,6 +1,6 @@
 -- DROP SCHEMA public;
 
-CREATE SCHEMA public AUTHORIZATION postgres;
+-- CREATE SCHEMA public AUTHORIZATION postgres;
 
 -- DROP SEQUENCE public.abuse_metadata_index_seq;
 
