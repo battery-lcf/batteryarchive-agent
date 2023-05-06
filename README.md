@@ -54,6 +54,8 @@ After the start script completes, you will be given the URLs to access the vario
 
 To get a description of the API, look at the YAML file in api/api.yaml
 
+During installation a sample database is added. You can use the database to import the sample data. If you like to run the database externally, you can use the schema in the data folder and create a database connection in redash. 
+
 ## Final setup and data import
 
 You are now ready to add data and use the site.
@@ -68,9 +70,10 @@ You are now ready to add data and use the site.
 
 To see the data and visualization that you just importer, login in the redaash admin interface and access the Queries page. Runs the queries in the order listed below. To run a query, click on it and then click on the blue arrow square in the bottom-right corner of the page. If the import was successful, data will appear in the Table section of the query page after you run it. 
 
-1. Run all the queries that start with Filter
-2. Run the queries that end with DD 
-3. Run the queries that end with List
+1. Run and publish all the queries that start with Filter
+2. Run and publish the queries that end with DD 
+3. Run and publish the queries that end with List
+4. Go to the Cycle Test Cell List, select the options in the drop down, run and publish
 
 
 ## Enable Jupyter Notebook
