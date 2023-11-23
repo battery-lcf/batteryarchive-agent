@@ -1052,14 +1052,15 @@ def add_ts_md_abuse(cell_list, conn, save, plot, path, slash):
 
         print("tester=" + tester)
 
-        #if tester=='ORNL-Servo-Motor':
-        print("CELL=" + cell_id)
-        df_abuse_ts = read_ornlabuse(file_path, cell_id)
-        #if tester=='SNL-Hydraulic':
-        #df_abuse_ts = read_snlabuse(file_path, cell_id)
+        if tester=='ORNL-Servo-Motor':
+            print("CELL=" + cell_id)
+            df_abuse_ts = read_ornlabuse(file_path, cell_id)
+        if tester=='SNL-Hydraulic':
+            print("CELL=" + cell_id)
+            df_abuse_ts = read_snlabuse(file_path, cell_id)
        
         if not df_abuse_ts.empty:
-            #df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
+            df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
             df_abuse_ts.to_sql('abuse_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
             
 
