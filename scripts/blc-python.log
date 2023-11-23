@@ -584,3 +584,14 @@
 2023-11-21 18:10:26,946 save cell metadata
 2023-11-21 18:10:27,042 save cycle metadata
 2023-11-21 18:10:30,806 Done adding files
+2023-11-23 09:51:32,288 starting
+2023-11-23 09:51:32,297 command line: [('-t', 'abuse'), ('-m', 'add'), ('-p', '../data/abuse/')]
+2023-11-23 09:51:32,297 configuration: {'version': '0.1', 'environment': {'STYLE': 'unix', 'PLOT': False, 'SAVE': True}}
+2023-11-23 09:51:32,297 add cells
+2023-11-23 09:51:33,762 add file: ornl cell: ORNL_disruptive
+2023-11-23 09:51:33,899 save cell metadata
+2023-11-23 09:51:34,151 save cycle metadata
+2023-11-23 09:52:52,711 add file: snl cell: SNL_disruptive
+2023-11-23 09:52:52,719 save cell metadata
+2023-11-23 09:52:52,763 save cycle metadata
+2023-11-23 09:52:57,866 Done adding files

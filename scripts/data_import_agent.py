@@ -830,7 +830,6 @@ def get_cycle_stats_index_max(cell_id,conn):
     record = [r[0] for r in curs.fetchall()]
 
     if record[0]: 
-        # bad valerio -- very bad! you are a very bad man!!
         cycle_index_max = record[0]
     else:
         cycle_index_max = 0
@@ -857,7 +856,6 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        # bad valerio -- very bad! you are a very bad man!!
         status = record[0][8]
     else:
         status = 'new'
@@ -910,27 +908,12 @@ def read_ornlabuse(file_path, cell_id):
 
     excels = glob.glob(file_path + '*.xls*')
 
-    #df_ts = pd.DataFrame()
-    #df_ts['test_time'] = df_ts_file['Test Time [s]']
-    #df_ts['axial_d'] = df_ts_file['Displacement [mm]']
-    #df_ts['axial_f'] = df_ts_file['Penetrator Force [mm]']
-    #df_ts['v'] = df_ts_file['vCell [V]']
-    #df_ts['ambient_temperature'] = df_ts_file['tAmbient [C]']
-    #df_ts['top_indent_temperature'] = df_ts_file['TC1 near positive terminal [C]']
-    #df_ts['top_back_temperature'] = df_ts_file['TC2 near negative terminal [C]']
-    #df_ts['left_bottom_temperature'] = df_ts_file['TC3 bottom - bottom [C]']
-    #df_ts['right_bottom_temperature'] = df_ts_file['TC4 bottom - top [C]']
-    #df_ts['above_punch_temperature'] = df_ts_file['TC5 above punch [C]']
-    #df_ts['below_punch_temperature'] = df_ts_file['TC6 below punch [C]']
-
     df_tmerge = pd.DataFrame()
     for excel in excels:
         if '~$' in excel:
             continue
         df_ts_file = pd.read_excel(
             excel, sheet_name='Sheet1')  # dictionary of sheets
-
-        print(df_ts_file.columns)
 
         df_ts_a = pd.DataFrame()
         df_ts_a['test_time'] = df_ts_file['Time (second)']
@@ -966,11 +949,8 @@ def read_ornlabuse(file_path, cell_id):
 
         if df_tmerge.empty:
             df_tmerge = df_ts_a
-            ##df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
             df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
         else:
-            ##df_tmerge = df_tmerge.append(df_ts_a, ignore_index=True)
-            ##df_tmerge = df_tmerge.append(df_ts_b, ignore_index=True)
             df_tmerge = pd.concat([df_tmerge, df_ts_a], ignore_index=True)
             df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
 
@@ -1053,15 +1033,15 @@ def add_ts_md_abuse(cell_list, conn, save, plot, path, slash):
         print("tester=" + tester)
 
         if tester=='ORNL-Servo-Motor':
-            print("CELL=" + cell_id)
             df_abuse_ts = read_ornlabuse(file_path, cell_id)
         if tester=='SNL-Hydraulic':
-            print("CELL=" + cell_id)
             df_abuse_ts = read_snlabuse(file_path, cell_id)
        
         if not df_abuse_ts.empty:
             df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
             df_abuse_ts.to_sql('abuse_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
+            status = 'completed'
+            set_cell_status(cell_id, status, conn)
             
 
 # add cells to the database
