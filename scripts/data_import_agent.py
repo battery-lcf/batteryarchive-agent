@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
-from imghdr import tests
+#from imghdr import tests
 import os
 import glob
 import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
 import matplotlib.pyplot as plt
 import psycopg2
 from sqlalchemy import create_engine
@@ -94,7 +95,7 @@ def calc_cycle_quantities(df):
 
 
 # calculate statistics and cycle time
-def calc_stats(df_t):
+def calc_stats(df_t, ID):
 
     logging.info('calculate cycle time and cycle statistics')
     df_t['cycle_time'] = 0
@@ -104,9 +105,9 @@ def calc_stats(df_t):
     # Initialize the cycle_data time frame
     a = [0 for x in range(no_cycles)]  # using loops
 
-    df_c = pd.DataFrame(data=a, columns=["cycle_index"])
+    df_c = pd.DataFrame(data=a, columns=["cycle_index"]) 
 
-    df_c['cell_id'] = df_t['cell_id']
+    df_c['cell_id'] = ID
     df_c['cycle_index'] = 0
     df_c['v_max'] = 0
     df_c['i_max'] = 0
@@ -121,6 +122,25 @@ def calc_stats(df_t):
     df_c['test_time'] = 0
     df_c['ah_eff'] = 0
     df_c['e_eff'] = 0
+
+    convert_dict = {'cell_id': str,
+                'cycle_index': float,
+                'v_max': float,
+                'i_max': float,
+                'v_min': float,
+                'i_min': float,
+                'ah_c': float,
+                'ah_d': float,
+                'e_c': float,
+                'e_d': float,
+                'v_c_mean': float,
+                'v_d_mean': float,
+                'test_time': float,
+                'ah_eff': float,
+                'e_eff': float
+            }
+ 
+    df_c = df_c.astype(convert_dict)
 
     for c_ind in df_c.index:
         x = c_ind + 1
@@ -181,8 +201,9 @@ def calc_stats(df_t):
             except Exception as e:
                 logging.info("Exception @ x: " + str(x))
                 logging.info(e)
-
+                
     logging.info("cycle: " + str(x))
+    logging.info("cell_id: "+ df_c['cell_id'])
 
     df_cc = df_c[df_c['cycle_index'] > 0]
     df_tt = df_t[df_t['cycle_index'] > 0]
@@ -500,14 +521,20 @@ def read_save_timeseries_generic(cell_id, file_path, engine, conn):
             df_time_series_file = pd.read_csv(cellpath)
             # Find the time series sheet in the excel file
 
+            #Calculate the Time (s) for the UConn data (only has date time)
+            df_time_series_file['pystamp']=pd.to_datetime(df_time_series_file['Timestamp']) #convert to python date-time format in ns
+            df_time_series_file['inttime']=df_time_series_file['pystamp'].astype(int)
+            df_time_series_file['inttime']=df_time_series_file['inttime'].div(10**9)
+            df_time_series_file['Time [s]']=df_time_series_file['inttime']-df_time_series_file['inttime'].iloc[0]
+
             df_time_series = pd.DataFrame()
 
             try:
-                df_time_series['cycle_index'] = df_time_series_file['Cycle number']
+                df_time_series['cycle_index'] = df_time_series_file['Cycle'] #changed
                 df_time_series['test_time'] = df_time_series_file['Time [s]']
-                df_time_series['i'] = df_time_series_file['Current [mA]']/1000
-                df_time_series['v'] = df_time_series_file['Voltage [V]']
-                #df_time_series['date_time'] = df_time_series_file['Date_Time']
+                df_time_series['i'] = df_time_series_file['Current (A)'] #changed
+                df_time_series['v'] = df_time_series_file['Voltage (V)']
+                df_time_series['date_time'] = df_time_series_file['Timestamp'] #previously commented out
                 df_time_series['cell_id'] = cell_id
                 df_time_series['sheetname'] = filename
 
@@ -812,8 +839,6 @@ def get_cycle_index_max(cell_id,conn):
     curs.close()
     db_conn.close()
 
-    print("buffer cycle_index_max: " + str(cycle_index_max))
-
     return cycle_index_max
 
 
@@ -837,8 +862,6 @@ def get_cycle_stats_index_max(cell_id,conn):
     curs.close()
     db_conn.close()
 
-    print("stats cycle_index_max: " + str(cycle_index_max))
-
     return cycle_index_max
 
 
@@ -856,12 +879,14 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        status = record[0][8]
+        status = record[0][9]
     else:
         status = 'new'
 
     curs.close()
     db_conn.close()
+
+    print('cell status is: ' + status)
 
     return status
 
@@ -1147,7 +1172,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
 
                     if not df_ts.empty:
                         start_time = time.time()
-                        df_cycle_stats, df_cycle_timeseries = calc_stats(df_ts)
+                        df_cycle_stats, df_cycle_timeseries = calc_stats(df_ts, cell_id)
                         print("calc_stats time: " + str(time.time() - start_time))
                         logging.info("calc_stats time: " + str(time.time() - start_time))
 
@@ -1160,6 +1185,9 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
                         df_cycle_timeseries.to_sql('cycle_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
                         print("save timeseries time: " + str(time.time() - start_time))
                         logging.info("save timeseries time: " + str(time.time() - start_time))
+
+                        get_cycle_index_max(cell_id,conn)
+                        get_cycle_stats_index_max(cell_id, conn)
 
             status='completed'
 
@@ -1268,7 +1296,7 @@ def update_cells(conn, save, plot):
     print(sql_str)
     df_cells = pd.read_sql(sql_str, conn)
 
-    engine = create_engine(conn)
+    engine = create_engine(conn, echo=True)
 
     # Process one cell at the time
     for ind in df_cells.index:
@@ -1421,6 +1449,9 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
+
+
+
 
 
 
