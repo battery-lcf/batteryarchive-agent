@@ -388,7 +388,7 @@ def read_save_timeseries_arbin(cell_id, file_path, engine, conn):
     return cycle_index_max
 
 
-# import data from generic csv files
+# import data from json files
 def read_save_timeseries_json(cell_id, file_path, engine, conn):
 
     # the importer can read Excel worksheets with the Channel number from Arbin files.
@@ -879,7 +879,7 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        status = record[0][9]
+        status = record[0][8]
     else:
         status = 'new'
 
