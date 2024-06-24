@@ -1,13 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-#get_ipython().system('jupyter nbconvert --to python data_import_agent_flow.ipynb')
-
-
-# In[22]:
+# Copyright 2024 National Technology & Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
 
 
 import os
@@ -332,7 +323,7 @@ def clear_buffer(cell_id, conn):
     db_conn = psycopg2.connect(conn)
     curs = db_conn.cursor()
 
-    curs.execute("delete from cycle_timeseries_buffer where cell_id='" + cell_id + "'")
+    curs.execute("delete from flow_cycle_timeseries_buffer where cell_id='" + cell_id + "'")
 
     db_conn.commit()
     curs.close()
