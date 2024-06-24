@@ -4,7 +4,7 @@ import pandas as pd
 import csv
 import sys, getopt
 
-# Copyright 2021 National Technology & Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
+# Copyright 2024 National Technology & Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
 
 # Prints charge and discharge capacity for selected cycles
 # Reads a CSV file with UCONN formatting as described in read_csv_rows()
