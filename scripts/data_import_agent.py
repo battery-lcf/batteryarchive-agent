@@ -4,6 +4,8 @@
 import os
 import glob
 import pandas as pd
+import numpy as np #for mat files
+import h5py #for mat files
 pd.options.mode.chained_assignment = None  # default='warn'
 import matplotlib.pyplot as plt
 import psycopg2
@@ -29,6 +31,39 @@ def listToString(s):
         # return string
     return str1
 
+#for matlab files
+def convert_mat_to_df(batch):
+    num_cells = batch['summary'].shape[0]
+    bat_dict = {}
+    for i in range(num_cells):
+        cycle_dataframes = []
+        cl = f[batch['cycle_life'][i,0]][()]
+        summary_CY = np.hstack(f[batch['summary'][i,0]]['cycle'][0,:].tolist())
+        cycles = f[batch['cycles'][i,0]]
+        cycle_dict = {}
+        no_cycles = cycles['I'].shape[0]
+        for j in range(no_cycles):
+            I = np.hstack((f[cycles['I'][j,0]][()]))
+            Qc = np.hstack((f[cycles['Qc'][j,0]][()]))
+            Qd = np.hstack((f[cycles['Qd'][j,0]][()]))
+            T = np.hstack((f[cycles['T'][j,0]][()]))
+            V = np.hstack((f[cycles['V'][j,0]][()]))
+            #dQdV = np.hstack((f[cycles['discharge_dQdV'][j,0]][()]))
+            t = np.hstack((f[cycles['t'][j,0]][()]))
+            cd = {'I': I, 'Qc': Qc, 'Qd': Qd, 'T': T, 'V':V, 't':t}
+            cycle_dict[str(j)] = cd
+            df_cycle = pd.DataFrame(cd)
+            df_cycle['cycle_number'] = summary_CY[j]
+            cycle_dataframes.append(df_cycle)
+    
+        df_battery = pd.concat(cycle_dataframes)
+
+        cell_dict = {'cycle_life': cl, 'summary': summary_CY, 'cycles': cycle_dict}
+        key = 'b3c' + str(i)
+        bat_dict[key] = cell_dict
+        
+    print(df_battery)
+    return df_battery
 
 # unpack the dataframe and calculate quantities used in statistics
 def calc_cycle_quantities(df):
@@ -48,7 +83,6 @@ def calc_cycle_quantities(df):
     initial_time = 0
 
     for x in tmp_arr:
-
         if start == 0:
             start += 1
             initial_time = x[0]
@@ -70,7 +104,6 @@ def calc_cycle_quantities(df):
         last_i = x[1]
         last_v = x[2]
         
-
     df_tmp = pd.DataFrame(data=tmp_arr[:, [3]], columns=["ah_c"])
     df_tmp.index += df.index[0]
     df['ah_c'] = df_tmp['ah_c']/3600.0
@@ -86,11 +119,10 @@ def calc_cycle_quantities(df):
     df_tmp = pd.DataFrame(data=tmp_arr[:, [6]], columns=["e_d"])
     df_tmp.index += df.index[0]
     df['e_d'] = -df_tmp['e_d']/3600.0
-
+    
     df_tmp = pd.DataFrame(data=tmp_arr[:, [7]], columns=["cycle_time"])
     df_tmp.index += df.index[0]
     df['cycle_time'] = df_tmp['cycle_time']
-
     return df
 
 
@@ -101,10 +133,10 @@ def calc_stats(df_t, ID):
     df_t['cycle_time'] = 0
 
     no_cycles = int(df_t['cycle_index'].max())
-
+    
     # Initialize the cycle_data time frame
-    a = [0 for x in range(no_cycles)]  # using loops
-
+    a = [x for x in range(no_cycles-30, no_cycles)]  # using loops
+    
     df_c = pd.DataFrame(data=a, columns=["cycle_index"]) 
 
     df_c['cell_id'] = ID
@@ -143,24 +175,24 @@ def calc_stats(df_t, ID):
     df_c = df_c.astype(convert_dict)
 
     for c_ind in df_c.index:
-        x = c_ind + 1
-
-        df_f = df_t[df_t['cycle_index'] == x]
-
+        #x = c_ind + 1
+        x = no_cycles + c_ind - 29
+        
+        df_f = df_t[df_t['cycle_index'] == x] ##optimize call
+        
         df_f['ah_c'] = 0
         df_f['e_c'] = 0
         df_f['ah_d'] = 0
         df_f['e_d'] = 0
-
+        
         if not df_f.empty:
-
             try:
 
                 df_c.iloc[c_ind, df_c.columns.get_loc('cycle_index')] = x
 
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_max')] = df_f.loc[df_f['v'].idxmax()].v
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_min')] = df_f.loc[df_f['v'].idxmin()].v
-
+                
                 df_c.iloc[c_ind, df_c.columns.get_loc('i_max')] = df_f.loc[df_f['i'].idxmax()].i
                 df_c.iloc[c_ind, df_c.columns.get_loc('i_min')] = df_f.loc[df_f['i'].idxmin()].i
 
@@ -176,8 +208,7 @@ def calc_stats(df_t, ID):
                 df_t.loc[df_t.cycle_index == x, 'ah_c'] = df_f['ah_c']
                 df_t.loc[df_t.cycle_index == x, 'e_c'] = df_f['e_c']
                 df_t.loc[df_t.cycle_index == x, 'ah_d'] = df_f['ah_d']
-                df_t.loc[df_t.cycle_index == x, 'e_d'] = df_f['e_d']
-
+                
                 df_c.iloc[c_ind, df_c.columns.get_loc('ah_c')] = df_f['ah_c'].max()
                 df_c.iloc[c_ind, df_c.columns.get_loc('ah_d')] = df_f['ah_d'].max()
                 df_c.iloc[c_ind, df_c.columns.get_loc('e_c')] = df_f['e_c'].max()
@@ -197,7 +228,6 @@ def calc_stats(df_t, ID):
                 else:
                     df_c.iloc[c_ind, df_c.columns.get_loc('e_eff')] = df_c.iloc[c_ind, df_c.columns.get_loc('e_d')] / \
                                                                       df_c.iloc[c_ind, df_c.columns.get_loc('e_c')]
-
             except Exception as e:
                 logging.info("Exception @ x: " + str(x))
                 logging.info(e)
@@ -636,6 +666,85 @@ def read_save_timeseries_voltaiq(cell_id, file_path, engine, conn):
 
     return cycle_index_max
 
+def read_save_timeseries_matlab(cell_id, file_path, engine, conn):
+    # the importer can read Excel worksheets with the metadata from matlab files.
+    # it assumes column names:
+    # summary.cycle -> cycle_index
+    # cycles.t(s) -> test_time
+    # cycles.I(A) -> i
+    # cycles.V(V) -> v
+    # batch_date (separate from batch) -> date_time
+    
+    logging.info('adding files')
+
+    listOfFiles = glob.glob(file_path + '*.xls*')
+
+    for i in range(len(listOfFiles)):
+        listOfFiles[i] = listOfFiles[i].replace(file_path[:-1], '')
+
+    logging.info('list of files to add: ' + str(listOfFiles))
+
+    df_file = pd.DataFrame(listOfFiles, columns=['filename'])
+
+    df_file.sort_values(by=['filename'], inplace=True)
+
+    if df_file.empty:
+        return
+
+    df_file['cell_id'] = cell_id
+
+    df_tmerge = pd.DataFrame()
+
+    start_time = time.time()
+
+    cycle_index_max = 0
+
+    sheetnames = buffered_sheetnames(cell_id, conn)
+
+    # Loop through all the Excel test files
+    for ind in df_file.index:
+
+        filename = df_file['filename'][ind]
+        cellpath = file_path + filename
+        timeseries = ""
+
+        logging.info('processing file: ' + filename)
+
+        if os.path.exists(cellpath):
+            f = h5py.File(cellpath)
+            batch = f['batch']
+            df_battery = convert_mat_to_df(batch)
+            #df_cell = pd.ExcelFile(cellpath)
+            
+            # Find the time series sheet in the excel file
+            df_time_series = pd.DataFrame()
+
+            try:
+
+                df_time_series['cycle_index'] = df_battery['cycle_number']
+                df_time_series['test_time'] = df_battery['t']
+                df_time_series['i'] = df_battery['I']
+                df_time_series['v'] = df_battery['V']
+                #df_time_series['date_time'] = df_battery[]
+                df_time_series['cell_id'] = cell_id
+                df_time_series['sheetname'] = filename + "|" + timeseries
+
+                cycle_index_file_max = df_time_series.cycle_index.max()
+
+                print('saving sheet: ' + timeseries + ' with max cycle: ' +str(cycle_index_file_max))
+
+                df_time_series.to_sql('cycle_timeseries_buffer', con=engine, if_exists='append', chunksize=1000, index=False)
+
+                print("saved=" + filename + " time: " + str(time.time() - start_time))
+
+                start_time = time.time()
+
+            except KeyError as e:
+                print("I got a KeyError - reason " + str(e))
+                print("processing:" + timeseries + " time: " + str(time.time() - start_time))
+                start_time = time.time()
+        
+    return cycle_index_max
 
 # sort data imported to insure cycle index and test times are correctly calculated
 def sort_timeseries(df_tmerge):
@@ -1077,10 +1186,13 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
     logging.info('add cells')
     df_excel = pd.read_excel(cell_list)
 
+    file_id = df_excel['file_id'][0]
+    
     # Process one cell at the time
     for ind in df_excel.index:
 
         cell_id = df_excel['cell_id'][ind]
+        prev_file_id = file_id
         file_id = df_excel['file_id'][ind]
         tester = df_excel['tester'][ind]
 
@@ -1136,6 +1248,10 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             if tester == 'voltaiq':
                 print("start import")
                 cycle_index_max = read_save_timeseries_voltaiq(cell_id, file_path, engine, conn) 
+
+            if tester == 'matlab':
+                if file_id == prev_file_id:
+                    cycle_index_max = read_save_timeseries_matlab(cell_id, file_path, engine, conn)
             
             status = "processing"
 
@@ -1186,8 +1302,8 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
                         print("save timeseries time: " + str(time.time() - start_time))
                         logging.info("save timeseries time: " + str(time.time() - start_time))
 
-                        get_cycle_index_max(cell_id,conn)
-                        get_cycle_stats_index_max(cell_id, conn)
+                        #get_cycle_index_max(cell_id,conn)
+                        #get_cycle_stats_index_max(cell_id, conn)
 
             status='completed'
 
@@ -1448,7 +1564,9 @@ def main(argv):
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    #import cProfile
+    main(sys.argv[1:])
+    #cProfile.run('main()')
 
 
 
