@@ -474,7 +474,7 @@ def import_all_module_data(df_module_metadata, base_filepath, engine):
         file_id = row["file_id"]
         module_id = row["module_id"]
         module_path = os.path.join(base_filepath, file_id)
-        configuration_file = os.path.join(module_path, f"{file_id}v2.xlsx")
+        configuration_file = os.path.join(module_path, f"{file_id}.xlsx")
         data_files = glob.glob(os.path.join(module_path, f"*.xlsx"))
         # Filter out configuration files
         data_files = [file for file in data_files if file_id not in os.path.basename(file) and "~$" not in os.path.basename(file)]
