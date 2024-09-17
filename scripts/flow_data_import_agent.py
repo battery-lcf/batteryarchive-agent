@@ -277,7 +277,6 @@ def get_cycle_index_max(cell_id,conn):
     record = [r[0] for r in curs.fetchall()]
 
     if record[0]: 
-        # bad valerio -- very bad! you are a very bad man!!
         cycle_index_max = record[0]
     else:
         cycle_index_max = 0
@@ -380,9 +379,82 @@ def set_cell_status(cell_id, status, conn):
 
 # In[32]:
 
+def read_save_timeseries_csv(cell_id, file_path, engine, conn):
+
+    logging.info('adding files')
+
+    print("path: " + file_path)
+
+    listOfFiles = glob.glob(file_path + '*.csv*')
+    print(listOfFiles)
+
+    print("files:" + str(listOfFiles)) 
+
+    for i in range(len(listOfFiles)):
+        listOfFiles[i] = listOfFiles[i].replace(file_path[:-1], '')
+
+    logging.info('list of files to add: ' + str(listOfFiles))
+
+    df_file = pd.DataFrame(listOfFiles, columns=['filename'])
+
+    df_file.sort_values(by=['filename'], inplace=True)
+
+    if df_file.empty:
+        return
+
+    df_file['cell_id'] = cell_id
+
+    df_tmerge = pd.DataFrame()
+
+    start_time = time.time()
+
+    cycle_index_max = 0
+
+    # Loop through all the Excel test files
+    for ind in df_file.index:
+
+        filename = df_file['filename'][ind]
+        cellpath = file_path + filename
+        timeseries = ""
+
+        logging.info('processing file: ' + filename)
+
+        if os.path.exists(cellpath):
+            df_time_series_file = pd.read_csv(cellpath)
+            # Find the time series sheet in the excel file
+
+            df_time_series = pd.DataFrame()
+
+            try:
+                print('yes')
+                df_time_series['cycle_index'] = df_time_series_file['cycle_index'] 
+                df_time_series['test_time'] = df_time_series_file['test_time']
+                df_time_series['i'] = df_time_series_file['i'] 
+                df_time_series['v'] = df_time_series_file['v']
+                #df_time_series['date_time'] = df_time_series_file['Timestamp'] 
+                df_time_series['cell_id'] = cell_id
+                df_time_series['sheetname'] = filename
+                
+                cycle_index_file_max = df_time_series.cycle_index.max()
+
+                print('saving sheet: ' + timeseries + ' with max cycle: ' +str(cycle_index_file_max))
+
+                df_time_series.to_sql('flow_cycle_timeseries_buffer', con=engine, if_exists='append', chunksize=1000, index=False)
+
+                print("saved=" + filename + " time: " + str(time.time() - start_time))
+
+                start_time = time.time()
+
+            except KeyError as e:
+                print("I got a KeyError - reason " + str(e))
+                print("processing:" + timeseries + " time: " + str(time.time() - start_time))
+                start_time = time.time()
+
+    return cycle_index_max
+
 
 # import data from flow battery Arbin-generated Excel files
-def read_save_timeseries(cell_id, file_path, engine, conn):
+def read_save_timeseries_arbin(cell_id, file_path, engine, conn):
 
     # the importer can read Excel worksheets with the Channel number in the sheetname.
     # it assumes column names:
@@ -392,7 +464,7 @@ def read_save_timeseries(cell_id, file_path, engine, conn):
     # Voltage(V) -> v
     # Temperature (C)_1 -> env_temperature
     # Date_Time -> date_time
-
+    
     logging.info('adding files')
 
     listOfFiles = glob.glob(file_path + '*.xls*')
@@ -422,6 +494,7 @@ def read_save_timeseries(cell_id, file_path, engine, conn):
     # Loop through all the Excel test files
     for ind in df_file.index:
 
+        print('hello')
         filename = df_file['filename'][ind]
         cellpath = file_path + filename
         timeseries = ""
@@ -525,8 +598,8 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
 
             logging.info('save cell metadata')
             df_cell_md.to_sql('flow_cell_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
-            #logging.info('save cycle metadata')
-            #df_cycle_md.to_sql('cycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
+            logging.info('save cycle metadata')
+            df_cycle_md.to_sql('cycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
 
             status = 'buffering'
 
@@ -534,12 +607,19 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
         if status=='buffering':
 
             print("buffering cell_id: " + cell_id)
-            
+
             # Modify this method to add more testers
             file_path = path + file_id + slash
 
+            print("select import")
+            if tester == 'arbin':
+                cycle_index_max = read_save_timeseries_arbin(cell_id, file_path, engine, conn)
+
+            if tester == 'csv':
+                cycle_index_max = read_save_timeseries_csv(cell_id, file_path, engine, conn) 
+
             print('start import')
-            cycle_index_max = read_save_timeseries(cell_id, file_path, engine, conn)
+            #cycle_index_max = read_save_timeseries_arbin(cell_id, file_path, engine, conn)
 
             status = "processing"
 
@@ -590,8 +670,8 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
                         print("save timeseries time: " + str(time.time() - start_time))
                         logging.info("save timeseries time: " + str(time.time() - start_time))
 
-                        get_cycle_index_max(cell_id,conn)
-                        get_cycle_stats_index_max(cell_id, conn)
+                        # get_cycle_index_max(cell_id,conn)
+                        # get_cycle_stats_index_max(cell_id, conn)
 
             status='completed'
 
@@ -614,20 +694,15 @@ def main(argv):
     logging.info('starting')
 
     try:
-        opts, args = getopt.getopt(argv, "hm:p:t:", ["mode=", "path=", "test="])
+        opts, args = getopt.getopt(argv, "h")
+        path = args[0]
     except getopt.GetoptError:
-        print('run as: data_import.py -m <mode> -t <test> -p <path>')
+        print('run as: data_import_agent.py <path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('data_import.py -m <mode> -t <test> -p <path>')
+            print('run as: data_import_agent.py <path>')
             sys.exit()
-        elif opt in ("-m", "--mode"):
-            mode = arg
-        elif opt in ("-t", "--test"):
-            test = arg
-        elif opt in ("-p", "--path"):
-            path = arg
 
     # read database connection
     conn = ''
@@ -661,29 +736,7 @@ def main(argv):
     elif style == 'windows':
         slash = r'\\'
 
-    # Mode of operation
-    if mode == 'add':
-        if test == 'cycle':
-            add_ts_md_cycle(path + "cell_list.xlsx", conn, save, plot, path, slash)
-        #if test == 'abuse':
-            #add_ts_md_abuse(path + "cell_list.xlsx", conn, save, plot, path, slash)
-        logging.info('Done adding files')
-    elif mode == 'update':
-        #update_cells(conn, save, plot)
-        logging.info('Done updating files')
-    elif mode == 'export':
-        #export_cells(path, conn, path)
-        logging.info('Done exporting files')
-    elif mode == 'env':
-        logging.info('printing environment variables only')
-        print("style: " + style)
-        print("  -slash: " + slash)
-        print("  -path: " + path)
-        print("conn: " + conn)
-        print("plot: " + str(plot))
-        print("save: " + str(save))
-    else:
-        print('data_import.py -m <mode> -p <path>')
+    add_ts_md_cycle(path + "cell_list.xlsx", conn, save, plot, path, slash)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-#from imghdr import tests
+
 import os
 import glob
 import pandas as pd
@@ -14,7 +14,6 @@ import yaml
 import sys, getopt
 import logging
 import logging.config
-import zipfile
 import time
 
 # Copyright 2021 National Technology & Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
@@ -563,11 +562,11 @@ def read_save_timeseries_generic(cell_id, source, file_path, engine, conn):
 
             try:
                 if source=='ISU-ILCC':
-                    df_time_series['cycle_index'] = df_time_series_file['Cycle'] #changed
+                    df_time_series['cycle_index'] = df_time_series_file['Cycle'] 
                     df_time_series['test_time'] = df_time_series_file['Time [s]']
-                    df_time_series['i'] = df_time_series_file['Current (A)'] #changed
+                    df_time_series['i'] = df_time_series_file['Current (A)'] 
                     df_time_series['v'] = df_time_series_file['Voltage (V)']
-                    df_time_series['date_time'] = df_time_series_file['Timestamp'] #previously commented out
+                    df_time_series['date_time'] = df_time_series_file['Timestamp'] 
                     df_time_series['cell_id'] = cell_id
                     df_time_series['sheetname'] = filename
                 elif source=='TON-KIT':
@@ -859,30 +858,30 @@ def populate_cycle_metadata(df_c_md):
 
 
 # Build cell metadata
-def populate_abuse_metadata(df_c_md):
+# def populate_abuse_metadata(df_c_md):
 
-    # Build cell metadata
-    df_cell_md = pd.DataFrame()
-    df_cell_md['cell_id'] = [df_c_md['cell_id']]
-    df_cell_md['anode'] = [df_c_md['anode']]
-    df_cell_md['cathode'] = [df_c_md['cathode']]
-    df_cell_md['source'] = [df_c_md['source']]
-    df_cell_md['ah'] = [df_c_md['ah']]
-    df_cell_md['form_factor'] = [df_c_md['form_factor']]
-    df_cell_md['test'] = [df_c_md['test']]
-    df_cell_md['tester'] = [df_c_md['tester']]
-    df_cell_md['weight'] = [df_c_md['weight']]
-    df_cell_md['dimensions'] = [df_c_md['dimensions']]
+#     # Build cell metadata
+#     df_cell_md = pd.DataFrame()
+#     df_cell_md['cell_id'] = [df_c_md['cell_id']]
+#     df_cell_md['anode'] = [df_c_md['anode']]
+#     df_cell_md['cathode'] = [df_c_md['cathode']]
+#     df_cell_md['source'] = [df_c_md['source']]
+#     df_cell_md['ah'] = [df_c_md['ah']]
+#     df_cell_md['form_factor'] = [df_c_md['form_factor']]
+#     df_cell_md['test'] = [df_c_md['test']]
+#     df_cell_md['tester'] = [df_c_md['tester']]
+#     df_cell_md['weight'] = [df_c_md['weight']]
+#     df_cell_md['dimensions'] = [df_c_md['dimensions']]
     
-    # Build cycle metadata
-    df_abuse_md = pd.DataFrame()
-    df_abuse_md['cell_id'] = [df_c_md['cell_id']]
-    df_abuse_md['v_init'] = [df_c_md['v_init']]
-    df_abuse_md['indentor'] = [df_c_md['indentor']]
-    df_abuse_md['nail_speed'] = [df_c_md['nail_speed']]
-    df_abuse_md['soc'] = [df_c_md['soc']]
+#     # Build cycle metadata
+#     df_abuse_md = pd.DataFrame()
+#     df_abuse_md['cell_id'] = [df_c_md['cell_id']]
+#     df_abuse_md['v_init'] = [df_c_md['v_init']]
+#     df_abuse_md['indentor'] = [df_c_md['indentor']]
+#     df_abuse_md['nail_speed'] = [df_c_md['nail_speed']]
+#     df_abuse_md['soc'] = [df_c_md['soc']]
 
-    return df_cell_md, df_abuse_md
+#     return df_cell_md, df_abuse_md
 
 
 # direct_query
@@ -959,7 +958,6 @@ def get_cycle_index_max(cell_id,conn):
     record = [r[0] for r in curs.fetchall()]
 
     if record[0]: 
-        # bad valerio -- very bad! you are a very bad man!!
         cycle_index_max = record[0]
     else:
         cycle_index_max = 0
@@ -1007,7 +1005,7 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        status = record[0][8]
+        status = record[0][9]
     else:
         status = 'new'
 
@@ -1047,157 +1045,157 @@ def buffered_sheetnames(cell_id, conn):
 
 
 # calculate statistics for abuse test
-def calc_abuse_stats(df_t, df_test_md):
+# def calc_abuse_stats(df_t, df_test_md):
 
-    for _ in df_t.index:
-        df_t['norm_d'] = df_t.iloc[0:, df_t.columns.get_loc('axial_d')] - df_t['axial_d'][0]
-        df_t['strain'] = df_t.iloc[0:, df_t.columns.get_loc('norm_d')] / df_test_md['indentor']
+#     for _ in df_t.index:
+#         df_t['norm_d'] = df_t.iloc[0:, df_t.columns.get_loc('axial_d')] - df_t['axial_d'][0]
+#         df_t['strain'] = df_t.iloc[0:, df_t.columns.get_loc('norm_d')] / df_test_md['indentor']
 
-    return df_t
+#     return df_t
 
 
-# calculate statistics for abuse test
-def read_ornlabuse(file_path, cell_id):
+# # calculate statistics for abuse test
+# def read_ornlabuse(file_path, cell_id):
 
-    excels = glob.glob(file_path + '*.xls*')
+#     excels = glob.glob(file_path + '*.xls*')
 
-    df_tmerge = pd.DataFrame()
-    for excel in excels:
-        if '~$' in excel:
-            continue
-        df_ts_file = pd.read_excel(
-            excel, sheet_name='Sheet1')  # dictionary of sheets
+#     df_tmerge = pd.DataFrame()
+#     for excel in excels:
+#         if '~$' in excel:
+#             continue
+#         df_ts_file = pd.read_excel(
+#             excel, sheet_name='Sheet1')  # dictionary of sheets
 
-        df_ts_a = pd.DataFrame()
-        df_ts_a['test_time'] = df_ts_file['Time (second)']
-        df_ts_a['axial_d'] = df_ts_file['Displacement (mm)']
-        df_ts_a['v'] = df_ts_file['Voltage (V)']
-        df_ts_a['axial_f'] = df_ts_file['Penetrator Force (N)']
-        df_ts_a['load'] = df_ts_file['Load (lb)']
+#         df_ts_a = pd.DataFrame()
+#         df_ts_a['test_time'] = df_ts_file['Time (second)']
+#         df_ts_a['axial_d'] = df_ts_file['Displacement (mm)']
+#         df_ts_a['v'] = df_ts_file['Voltage (V)']
+#         df_ts_a['axial_f'] = df_ts_file['Penetrator Force (N)']
+#         df_ts_a['load'] = df_ts_file['Load (lb)']
 
-        df_ts_a['top_indent_temperature'] = 0
-        df_ts_a['top_back_temperature'] = 0
-        df_ts_a['left_bottom_temperature'] = 0
-        df_ts_a['right_bottom_temperature'] = 0
-        df_ts_a['above_punch_temperature'] = 0
-        df_ts_a['below_punch_temperature'] = 0
+#         df_ts_a['top_indent_temperature'] = 0
+#         df_ts_a['top_back_temperature'] = 0
+#         df_ts_a['left_bottom_temperature'] = 0
+#         df_ts_a['right_bottom_temperature'] = 0
+#         df_ts_a['above_punch_temperature'] = 0
+#         df_ts_a['below_punch_temperature'] = 0
 
-        df_ts_b = pd.DataFrame()
-        df_ts_b['test_time'] = df_ts_file['Time (sec) ']
-        df_ts_b['axial_d'] = 0
-        df_ts_b['v'] = 0
-        df_ts_b['axial_f'] = 0
+#         df_ts_b = pd.DataFrame()
+#         df_ts_b['test_time'] = df_ts_file['Time (sec) ']
+#         df_ts_b['axial_d'] = 0
+#         df_ts_b['v'] = 0
+#         df_ts_b['axial_f'] = 0
 
-        if 'TC1 top indent [C]' in df_ts_file:
-            print("6 cols" + cell_id) 
-            df_ts_b['top_indent_temperature'] = df_ts_file['TC1 top indent [C]']
-            df_ts_b['top_back_temperature'] = df_ts_file['TC2 top back [C]']
-            df_ts_b['left_bottom_temperature'] = df_ts_file['TC3 bottom back [C]']
-            df_ts_b['right_bottom_temperature'] = df_ts_file['TC4 bottom indent [C]']
-            df_ts_b['above_punch_temperature'] = df_ts_file['TC5 above punch [C]']
-            df_ts_b['below_punch_temperature'] = df_ts_file['TC6 below punch [C]']
-        elif 'TC1 (°C)' in df_ts_file:
-            print("1 col:" + cell_id)
-            df_ts_b['below_punch_temperature'] = df_ts_file['TC1 (°C)']
+#         if 'TC1 top indent [C]' in df_ts_file:
+#             print("6 cols" + cell_id) 
+#             df_ts_b['top_indent_temperature'] = df_ts_file['TC1 top indent [C]']
+#             df_ts_b['top_back_temperature'] = df_ts_file['TC2 top back [C]']
+#             df_ts_b['left_bottom_temperature'] = df_ts_file['TC3 bottom back [C]']
+#             df_ts_b['right_bottom_temperature'] = df_ts_file['TC4 bottom indent [C]']
+#             df_ts_b['above_punch_temperature'] = df_ts_file['TC5 above punch [C]']
+#             df_ts_b['below_punch_temperature'] = df_ts_file['TC6 below punch [C]']
+#         elif 'TC1 (°C)' in df_ts_file:
+#             print("1 col:" + cell_id)
+#             df_ts_b['below_punch_temperature'] = df_ts_file['TC1 (°C)']
 
-        if df_tmerge.empty:
-            df_tmerge = df_ts_a
-            df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
-        else:
-            df_tmerge = pd.concat([df_tmerge, df_ts_a], ignore_index=True)
-            df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
+#         if df_tmerge.empty:
+#             df_tmerge = df_ts_a
+#             df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
+#         else:
+#             df_tmerge = pd.concat([df_tmerge, df_ts_a], ignore_index=True)
+#             df_tmerge = pd.concat([df_tmerge, df_ts_b], ignore_index=True)
 
-    df_tmerge['cell_id'] = cell_id
+#     df_tmerge['cell_id'] = cell_id
 
-    return df_tmerge
+#     return df_tmerge
 
 
 # read the abuse excel files from SNL
-def read_snlabuse(file_path, cell_id):
+# def read_snlabuse(file_path, cell_id):
 
-    excels = glob.glob(file_path + '*.xls*')
+#     excels = glob.glob(file_path + '*.xls*')
 
-    df_tmerge = pd.DataFrame()
+#     df_tmerge = pd.DataFrame()
 
-    for excel in excels:
-        if '~$' in excel:
-            continue
-        df_ts_file = pd.read_excel(
-            excel, sheet_name='Sheet1')  # dictionary of sheets
+#     for excel in excels:
+#         if '~$' in excel:
+#             continue
+#         df_ts_file = pd.read_excel(
+#             excel, sheet_name='Sheet1')  # dictionary of sheets
 
-        df_ts = pd.DataFrame()
-        df_ts['test_time'] = df_ts_file['Test Time [s]']
-        df_ts['axial_d'] = df_ts_file['Displacement [mm]']
-        df_ts['axial_f'] = df_ts_file['Penetrator Force [mm]']
-        df_ts['v'] = df_ts_file['vCell [V]']
-        df_ts['ambient_temperature'] = df_ts_file['tAmbient [C]']
-        df_ts['top_indent_temperature'] = df_ts_file['TC1 near positive terminal [C]']
-        df_ts['top_back_temperature'] = df_ts_file['TC2 near negative terminal [C]']
-        df_ts['left_bottom_temperature'] = df_ts_file['TC3 bottom - bottom [C]']
-        df_ts['right_bottom_temperature'] = df_ts_file['TC4 bottom - top [C]']
-        df_ts['above_punch_temperature'] = df_ts_file['TC5 above punch [C]']
-        df_ts['below_punch_temperature'] = df_ts_file['TC6 below punch [C]']
+#         df_ts = pd.DataFrame()
+#         df_ts['test_time'] = df_ts_file['Test Time [s]']
+#         df_ts['axial_d'] = df_ts_file['Displacement [mm]']
+#         df_ts['axial_f'] = df_ts_file['Penetrator Force [mm]']
+#         df_ts['v'] = df_ts_file['vCell [V]']
+#         df_ts['ambient_temperature'] = df_ts_file['tAmbient [C]']
+#         df_ts['top_indent_temperature'] = df_ts_file['TC1 near positive terminal [C]']
+#         df_ts['top_back_temperature'] = df_ts_file['TC2 near negative terminal [C]']
+#         df_ts['left_bottom_temperature'] = df_ts_file['TC3 bottom - bottom [C]']
+#         df_ts['right_bottom_temperature'] = df_ts_file['TC4 bottom - top [C]']
+#         df_ts['above_punch_temperature'] = df_ts_file['TC5 above punch [C]']
+#         df_ts['below_punch_temperature'] = df_ts_file['TC6 below punch [C]']
 
-        if df_tmerge.empty:
-            df_tmerge = df_ts
-        else:
-            ##df_tmerge = df_tmerge.append(df_ts, ignore_index=True)
-            df_tmerge = pd.concat([df_tmerge, df_ts], ignore_index=True)
+#         if df_tmerge.empty:
+#             df_tmerge = df_ts
+#         else:
+#             ##df_tmerge = df_tmerge.append(df_ts, ignore_index=True)
+#             df_tmerge = pd.concat([df_tmerge, df_ts], ignore_index=True)
 
-    df_tmerge['cell_id'] = cell_id
+#     df_tmerge['cell_id'] = cell_id
 
-    return df_tmerge
+#     return df_tmerge
 
 
 # add cells to the database
-def add_ts_md_abuse(cell_list, conn, save, plot, path, slash):
-    # The importer expects an Excel file with cell and test information
-    # The file contains one row per cell
+# def add_ts_md_abuse(cell_list, conn, save, plot, path, slash):
+#     # The importer expects an Excel file with cell and test information
+#     # The file contains one row per cell
 
-    logging.info('add cells')
-    df_excel = pd.read_excel(cell_list)
+#     logging.info('add cells')
+#     df_excel = pd.read_excel(cell_list)
 
-    # Process one cell at the time
-    for ind in df_excel.index:
+#     # Process one cell at the time
+#     for ind in df_excel.index:
 
-        cell_id = df_excel['cell_id'][ind]
-        file_id = df_excel['file_id'][ind]
-        tester = df_excel['tester'][ind]
+#         cell_id = df_excel['cell_id'][ind]
+#         file_id = df_excel['file_id'][ind]
+#         tester = df_excel['tester'][ind]
 
-        logging.info("add file: " + file_id + " cell: " + cell_id)
+#         logging.info("add file: " + file_id + " cell: " + cell_id)
 
-        df_tmp = df_excel.iloc[ind]
+#         df_tmp = df_excel.iloc[ind]
 
-        print(df_tmp)
+#         print(df_tmp)
 
-        df_cell_md, df_abuse_md = populate_abuse_metadata(df_tmp)
+#         df_cell_md, df_abuse_md = populate_abuse_metadata(df_tmp)
 
-        engine = create_engine(conn)
+#         engine = create_engine(conn)
 
-        logging.info('save cell metadata')
-        df_cell_md.to_sql('cell_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
-        logging.info('save cycle metadata')
-        df_abuse_md.to_sql('abuse_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
+#         logging.info('save cell metadata')
+#         df_cell_md.to_sql('cell_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
+#         logging.info('save cycle metadata')
+#         df_abuse_md.to_sql('abuse_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
 
-        file_path = path + file_id + slash
+#         file_path = path + file_id + slash
 
-        df_abuse_ts = pd.DataFrame()   
+#         df_abuse_ts = pd.DataFrame()   
 
-        print("tester=" + tester)
+#         print("tester=" + tester)
 
-        if tester=='ORNL-Servo-Motor':
-            df_abuse_ts = read_ornlabuse(file_path, cell_id)
-        if tester=='SNL-Hydraulic':
-            df_abuse_ts = read_snlabuse(file_path, cell_id)
+#         if tester=='ORNL-Servo-Motor':
+#             df_abuse_ts = read_ornlabuse(file_path, cell_id)
+#         if tester=='SNL-Hydraulic':
+#             df_abuse_ts = read_snlabuse(file_path, cell_id)
        
-        if not df_abuse_ts.empty:
-            df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
-            df_abuse_ts.to_sql('abuse_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
-            status = 'completed'
-            set_cell_status(cell_id, status, conn)
+#         if not df_abuse_ts.empty:
+#             df_abuse_ts = calc_abuse_stats(df_abuse_ts, df_abuse_md)
+#             df_abuse_ts.to_sql('abuse_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
+#             status = 'completed'
+#             set_cell_status(cell_id, status, conn)
             
 
-# add cells to the database
+# # add cells to the database
 def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
     # The importer expects an Excel file with cell and test information
     # The file contains one row per cell
@@ -1250,7 +1248,6 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             # Modify this method to add more testers
             file_path = path + file_id + slash
 
-            # importer specific to the Arbin file (TODO)
             cycle_index_max = 1
 
             print("select import")
@@ -1331,174 +1328,6 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             clear_buffer(cell_id, conn)
 
 
-# generate csv files with cycle data
-def generate_cycle_data(cell_id, conn, path):
-
-    # generate cycle data in csv format
-
-    logging.info('export cell cycle data to csv files')
-
-    sql_str = """select 
-        cycle_index as "Cycle_Index", 
-        round(test_time,3) as "Test_Time (s)",
-        round(i_min,3) as "Min_Current (A)", 
-        round(i_max,3) as "Max_Current (A)", 
-        round(v_min,3) as "Min_Voltage (V)", 
-        round(v_max,3) as "Max_Voltage (V)", 
-        round(ah_c,3) as "Charge_Capacity (Ah)", 
-        round(ah_d,3) as "Discharge_Capacity (Ah)", 
-        round(e_c,3) as "Charge_Energy (Wh)", 
-        round(e_d,3)  as "Discharge_Energy (Wh)" 
-      from cycle_stats where cell_id='""" + cell_id + """' order by cycle_index"""
-
-    print(sql_str)
-
-    df = pd.read_sql(sql_str, conn)
-
-    cell_id_to_file = cell_id.replace(r'/', '-')
-    csv = path + cell_id_to_file + '_cycle_data.csv'
-    df.to_csv(csv, encoding='utf-8', index=False)
-
-
-# generate csv files with time series data
-def generate_timeseries_data(cell_id, conn, path):
-
-    # generate timeseries data
-
-    logging.info('export cell timeseries data to csv files')
-
-    sql_str = """select 
-          date_time as "Date_Time",
-          round(test_time,3) as "Test_Time (s)", 
-          cycle_index as "Cycle_Index", 
-          round(i,3) as "Current (A)",
-          round(v,3) as "Voltage (V)",
-          round(ah_c,3) as "Charge_Capacity (Ah)", 
-          round(ah_d,3) as "Discharge_Capacity (Ah)", 
-          round(e_c,3) as "Charge_Energy (Wh)", 
-          round(e_d,3) as "Discharge_Energy (Wh)",
-          round(env_temperature,3) as "Environment_Temperature (C)",
-          round(cell_temperature,3) as "Cell_Temperature (C)"
-      from cycle_timeseries where cell_id='""" + cell_id + """' order by test_time"""
-
-    print(sql_str)
-
-    df = pd.read_sql(sql_str, conn)
-
-    cell_id_to_file = cell_id.replace(r'/', '-')
-    csv = path + cell_id_to_file + '_timeseries_data.csv'
-    df.to_csv(csv, encoding='utf-8', index=False)
-
-
-# generate csv files with time series and cycle data
-def export_cells(cell_list, conn, path):
-
-    # export data from the cell list
-
-    logging.info('export cell data to csv files')
-    
-    # Look for cells that need to be updated
-
-    sql_str = "select * from cell_metadata where status = 'export' order by cell_id"
-    print(sql_str)
-    df_cells = pd.read_sql(sql_str, conn)
-
-    engine = create_engine(conn)
-
-    # Process one cell at the time
-    for ind in df_cells.index:
-        cell_id = df_cells['cell_id'][ind]
-        print("cell_id=" + cell_id)
-
-        generate_cycle_data(cell_id, conn, path)
-        generate_timeseries_data(cell_id, conn, path)
-
-        status='completed'
-
-        set_cell_status(cell_id, status, conn)
-
-    return;
-
-
-# add new calculated quantities to cells previously imported, or update existing calculated statistics
-def update_cells(conn, save, plot):
-
-    logging.info('update cell data')
-
-    # Look for cells that need to be updated
-
-    sql_str = "select * from cell_metadata where status = 'update' order by cell_id"
-    print(sql_str)
-    df_cells = pd.read_sql(sql_str, conn)
-
-    engine = create_engine(conn, echo=True)
-
-    # Process one cell at the time
-    for ind in df_cells.index:
-
-        cell_id = df_cells['cell_id'][ind]
-
-        # read the data back in chunks.
-        block_size = 30
-
-        cycle_index_max = get_cycle_stats_index_max(cell_id, conn)
-
-        print("cell_id=" + cell_id + " max cycle: " + str(cycle_index_max))
-
-        start_cycle = 1
-        start_time = time.time()
-
-        ####for i in range(block_size+1):
-        for i in range(cycle_index_max+1):
-
-                
-            if (i-1) % block_size == 0 and i > 0:
-
-                start_cycle = i
-                end_cycle = start_cycle + block_size - 1
-
-                sql_cell =  " cell_id='" + cell_id + "'" 
-                sql_cycle = " and cycle_index>=" + str(start_cycle) + " and cycle_index<=" + str(end_cycle)
-                sql_str = "select * from cycle_timeseries where " + sql_cell + sql_cycle + " order by test_time"
-
-                print(sql_str)
-                df_ts = pd.read_sql(sql_str, conn)
-
-                if not df_ts.empty:
-                    start_time = time.time()
-                    df_cycle_stats, df_cycle_timeseries = calc_stats(df_ts)
-                    print("calc_stats time: " + str(time.time() - start_time))
-                    logging.info("calc_stats time: " + str(time.time() - start_time))
-
-                    start_time = time.time()
-
-                    # remove old data before adding new data
-                    sql_str = "delete from cycle_stats where " + sql_cell + sql_cycle
-                    execute_query(sql_str,conn)
-
-                    df_cycle_stats.to_sql('cycle_stats', con=engine, if_exists='append', chunksize=1000, index=False)
-                    print("save stats time: " + str(time.time() - start_time))
-                    logging.info("save stats time: " + str(time.time() - start_time))
-
-                    start_time = time.time()
-                    
-                    # remove old data before adding new data
-                    sql_str = "delete from cycle_timeseries where " + sql_cell + sql_cycle
-                    execute_query(sql_str,conn)
-
-                    df_cycle_timeseries.to_sql('cycle_timeseries', con=engine, if_exists='append', chunksize=1000, index=False)
-                    print("save timeseries time: " + str(time.time() - start_time))
-                    logging.info("save timeseries time: " + str(time.time() - start_time))
-
-
-
-        status='completed'
-
-        set_cell_status(cell_id, status, conn)
-
-    return
-
-
 def main(argv):
 
     # command line variables that can be used to run from an IDE without passing arguments
@@ -1510,20 +1339,15 @@ def main(argv):
     logging.info('starting')
 
     try:
-        opts, args = getopt.getopt(argv, "hm:p:t:", ["mode=", "path=", "test="])
+        opts, args = getopt.getopt(argv, "h")
+        path = args[0]
     except getopt.GetoptError:
-        print('run as: data_import.py -m <mode> -t <test> -p <path>')
+        print('run as: data_import_agent.py <path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('data_import.py -m <mode> -t <test> -p <path>')
+            print('run as: data_import_agent.py <path>')
             sys.exit()
-        elif opt in ("-m", "--mode"):
-            mode = arg
-        elif opt in ("-t", "--test"):
-            test = arg
-        elif opt in ("-p", "--path"):
-            path = arg
 
     # read database connection
     conn = ''
@@ -1557,35 +1381,13 @@ def main(argv):
     elif style == 'windows':
         slash = r'\\'
 
-    # Mode of operation
-    if mode == 'add':
-        if test == 'cycle':
-            add_ts_md_cycle(path + "cell_list.xlsx", conn, save, plot, path, slash)
-        if test == 'abuse':
-            add_ts_md_abuse(path + "cell_list.xlsx", conn, save, plot, path, slash)
-        logging.info('Done adding files')
-    elif mode == 'update':
-        update_cells(conn, save, plot)
-        logging.info('Done updating files')
-    elif mode == 'export':
-        export_cells(path, conn, path)
-        logging.info('Done exporting files')
-    elif mode == 'env':
-        logging.info('printing environment variables only')
-        print("style: " + style)
-        print("  -slash: " + slash)
-        print("  -path: " + path)
-        print("conn: " + conn)
-        print("plot: " + str(plot))
-        print("save: " + str(save))
-    else:
-        print('data_import.py -m <mode> -p <path>')
+    add_ts_md_cycle(path + "cell_list.xlsx", conn, save, plot, path, slash)
+
 
 
 if __name__ == "__main__":
-    #import cProfile
     main(sys.argv[1:])
-    #cProfile.run('main()')
+
 
 
 
