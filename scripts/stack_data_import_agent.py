@@ -559,7 +559,7 @@ if __name__ == "__main__":
     parser.add_argument('stack_list')
     args = parser.parse_args()
 
-    stack_metadata_file = args.stack_list
+    stack_metadata_file = args.stack_list + 'stack_list.xlsx'
     conn, plot, save, style = get_environment()
     engine = create_engine(conn)
     df_stack_metadata = excel_to_dataframe(stack_metadata_file)

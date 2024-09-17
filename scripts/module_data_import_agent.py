@@ -513,7 +513,7 @@ if __name__ == "__main__":
     parser.add_argument('module_list')
     args = parser.parse_args()
 
-    module_metadata_file = args.module_list
+    module_metadata_file = args.module_list + 'module_list.xlsx'
     conn, plot, save, style = get_environment()
     engine = create_engine(conn)
     df_module_metadata = excel_to_dataframe(module_metadata_file)
