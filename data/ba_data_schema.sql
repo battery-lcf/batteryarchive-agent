@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS public.cell_metadata (
 	"source" text NULL,
 	ah int4 NULL,
 	form_factor text NULL,
-	test text NOT NULL,
+	test text NULL,
 	tester text NULL,
 	status text NULL,
 	weight text NULL,
@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS public.flow_cell_metadata (
 	flow_rate float(4) NULL,
 	test_type text NULL,
 	tester text NULL,
-	test text NOT NULL,
+	test text NULL,
 	status text NULL,
 	CONSTRAINT flow_cell_metadata_pkey PRIMARY KEY (index)
 );
