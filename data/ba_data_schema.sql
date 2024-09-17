@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS public.cycle_timeseries_buffer (
 CREATE TABLE IF NOT EXISTS public.flow_cell_metadata (
 	"index" serial4 NOT NULL,
 	cell_id text UNIQUE NOT NULL,
-	parent_id text UNIQUE NULL,
+	parent_id text NULL,
 	flow_pattern text NULL, 
 	NE_material text NULL, 
 	PE_material text NULL, 
@@ -409,7 +409,7 @@ CREATE TABLE IF NOT EXISTS module_metadata (
     status text
 );
 
-ALTER TABLE ONLY module_metadata ALTER COLUMN index SET DEFAULT nextval('module_metadata_index_seq'::regclass);
+ALTER TABLE ONLY module_metadata ALTER COLUMN index SET DEFAULT nextval('module_metadata_seq'::regclass);
 
 ALTER TABLE ONLY module_metadata
     ADD CONSTRAINT module_metadata_pkey PRIMARY KEY (index);
