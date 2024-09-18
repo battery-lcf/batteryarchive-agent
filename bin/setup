@@ -17,18 +17,18 @@ echo "DEFAULT_EMAIL=$DEFAULT_EMAIL" >> env
 echo "ADMIN_PASSWORD=$ADMIN_PASSWORD" >> env
 
 echo "Creating DB..."
-docker-compose run --rm server create_db
+docker compose run --rm server create_db
 
 echo "DB Created. Done"
 
 echo "Creating Dashboard Admin User..."
-docker-compose run --rm server manage users create_root --password ${ADMIN_PASSWORD} ${DEFAULT_EMAIL} admin 
+docker compose run --rm server manage users create_root --password ${ADMIN_PASSWORD} ${DEFAULT_EMAIL} admin 
 echo "Dashboard Admin Created. Done"
 
 echo "Creating Admin Redash User..."
 ## Retrieve the API Key from the first user we created
 
-ADMIN_API_KEY=$(docker-compose run --rm postgres psql -d ${REDASH_DATABASE_URL} -c "SELECT api_key FROM public.users" | sed -n '3 p' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+ADMIN_API_KEY=$(docker compose run --rm postgres psql -d ${REDASH_DATABASE_URL} -c "SELECT api_key FROM public.users" | sed -n '3 p' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 rm key
 echo ADMIN_API_KEY=${ADMIN_API_KEY} >> key
 echo "Admin User Created. Done."
@@ -51,7 +51,7 @@ DATASOURCE_OPTIONS_JSON_STRING=$(printf "${DATASOURCE_OPTIONS_JSON_FMT}" ${POSTG
 
 ## Add the first datasource
 echo "Adding Data source to Redash..."
-docker-compose run -d --rm server manage ds new --type pg --options ${DATASOURCE_OPTIONS_JSON_STRING} "battery_archive" 
+docker compose run -d --rm server manage ds new --type pg --options ${DATASOURCE_OPTIONS_JSON_STRING} "battery_archive" 
 
 ## Import the queries that we have in queries folder
 
