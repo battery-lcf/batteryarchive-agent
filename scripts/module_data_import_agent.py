@@ -75,8 +75,6 @@ def get_environment():
     if conn == '':
         conn = data['environment']['DATABASE_CONNECTION']
 
-    logging.info('configuration: ' + str(data))
-
     return conn, plot, save, style
 
 
