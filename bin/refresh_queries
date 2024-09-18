@@ -1,0 +1,10 @@
+## Grab the directory of the running script
+BIN_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+set -a
+source ${BIN_DIR}/../env
+source ${BIN_DIR}/../key
+set +a 
+
+cd ${BIN_DIR}/../provisioning
+python3 redash_provisioning.py refresh-queries --redash-key=${ADMIN_API_KE} --redash-url=http://0.0.0.0/api 
