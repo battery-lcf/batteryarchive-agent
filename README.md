@@ -16,20 +16,26 @@ The batteryarchive agent needs
 3. The latest version of Docker
 
 If you use ubuntu, you can run the following commands:
+``` bash
+apt-get update
 
-1. apt-get update
-2. apt-get install ca-certificates curl
-3. apt-get install -m 0755 -d /etc/apt/keyrings
-4. sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-5. sudo chmod a+r /etc/apt/keyrings/docker.asc
-6. echo \
+# Installing Docker
+apt-get install ca-certificates curl
+
+apt-get install -m 0755 -d /etc/apt/keyrings
+
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-7. apt-get update
-8. apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get update
 
+apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 ## Installation steps
 
 To install the battery-archive agent follow these steps:
