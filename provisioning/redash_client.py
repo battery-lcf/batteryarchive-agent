@@ -267,6 +267,8 @@ class RedashClient():
             query_id (int): _description_
             params (Dict): _description_
         """
+        params |= {"max_age": 0}
+        
         try:
             res = requests.post(self.queries_path+f"/{query_id}/results", 
                                     headers=self.headers, params=params)
