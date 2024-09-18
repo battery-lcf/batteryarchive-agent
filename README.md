@@ -19,7 +19,6 @@ If you use ubuntu, you can run the following commands:
 
 1. apt-get update
 2. apt-get install ca-certificates curl
-## Installing Docker
 3. apt-get install -m 0755 -d /etc/apt/keyrings
 4. sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 5. sudo chmod a+r /etc/apt/keyrings/docker.asc
