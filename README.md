@@ -68,7 +68,7 @@ During installation a sample database is added. You can use the database to impo
 
 You are now ready to add data and use the site.
 
-1. In the batteryarchive-agent folder, run: pip3 install -r requirements.txt 
+1. In the batteryarchive-agent folder, run: python3 -m pip install -r requirements.txt --break-system-packages
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes.
 3. cd scripts 
 4. To import sample cycle data: python3 data_import_agent.py -t cycle -m add -p ../data/cycle/  
