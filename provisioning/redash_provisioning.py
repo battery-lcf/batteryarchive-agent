@@ -121,8 +121,40 @@ def export_dashboards(file_name, redash_url, redash_key):
 
     client.save_dashboards_to_file(file_name, fetched_dashboards, fetched_queries)
 
+
+@click.command()
+@click.option('--redash-url', help="Redash URL to connect to", required=True, type=str)
+@click.option('--redash-key', help="Redash API Key to use",  required=True, type=str)
+def refresh_queries(redash_url, redash_key):
+    client = RedashClient(redash_key=redash_key, redash_url=redash_url)
+    queries = client.get_all_queries()
+
+    updated_queries = []
+
+    for q in queries:
+        if not q.options.get('parameters'):
+            try:
+                client.refresh_query_results(q.id, {})
+                updated_queries.append(q.id)
+            except:
+                print(f"Unable to refresh query ID {q.id}")
+    
+    for q in queries:
+        if q.options.get('parameters'):
+            for bq in q.options.get('parameters'):
+                if bq.get('queryId') and bq.get('queryId') not in updated_queries:
+                    print(f"{q.id} Requires {bq.get('queryId')} to update this query")
+                    try:
+                        client.refresh_query_results(bq.get('queryId'), {})
+                        updated_queries.append(bq.get('queryId'))
+                    except:
+                        print(f"Unable to refresh {bq.get('queryId')} for {q.id}")
+
+            
+
 cli.add_command(import_dashboards)
 cli.add_command(export_dashboards)
+cli.add_command(refresh_queries)
 
 if __name__ == '__main__':
     cli()
