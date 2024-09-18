@@ -63,18 +63,18 @@ For cell-level cycle data, there are five tables for li-on and five for flow bat
 | Column           | Data Type        | Description |
 | ---------------- | ---------------- | ----------- |
 | index            | integer          | 
-| i                | double precision |
-| v                | double precision |
-| ah_c             | double precision |
-| ah_d             | double precision |
+| i                | double precision | current |
+| v                | double precision | voltage |
+| ah_c             | double precision | charge energy |
+| ah_d             | double precision | discharge energy |
 | e_c              | double precision |
 | e_d              | double precision |
-| env_temperature  | double precision |
-| cell_temperature | double precision |
-| cycle_time       | double precision |
-| date_time        | timestamp without time zone |
+| env_temperature  | double precision | environment temperature |
+| cell_temperature | double precision | cell temperature |
+| cycle_time       | double precision | 
+| date_time        | timestamp without time zone | timestamp |
 | cycle_index      | integer |
-| test_time        | double precision |
+| test_time        | double precision | 
 | cell_id          | text          | unique id for each cell |
 | is_load_balanced | boolean |
 | component_level  | text | denotes whether row corresponds to a 'cell' or 'module' |
