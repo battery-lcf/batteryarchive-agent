@@ -19,8 +19,9 @@ If you use ubuntu, you can run the following commands:
 ``` bash
 apt-get update
 
+apt-get install -y ca-certificates curl python3-pip
+
 # Installing Docker
-apt-get install ca-certificates curl
 
 apt-get install -m 0755 -d /etc/apt/keyrings
 
@@ -34,7 +35,7 @@ echo \
 
 apt-get update
 
-apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 ## Installation steps
 
