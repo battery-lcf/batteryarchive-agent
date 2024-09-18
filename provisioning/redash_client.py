@@ -267,11 +267,11 @@ class RedashClient():
             query_id (int): _description_
             params (Dict): _description_
         """
-        params |= {"max_age": 0}
+        body = {"max_age": 0}
         
         try:
             res = requests.post(self.queries_path+f"/{query_id}/results", 
-                                    headers=self.headers, params=params)
+                                    headers=self.headers, params=params, json=body)
             if(res.status_code != 200):
                 print(f"Error refreshing the query: {res.content}")
             raw_query = res.json()
