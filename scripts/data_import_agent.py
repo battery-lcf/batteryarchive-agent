@@ -695,7 +695,7 @@ def read_save_timeseries_matlab(cell_id, file_path, engine, conn):
     
     logging.info('adding files')
 
-    listOfFiles = glob.glob(file_path + '*.xls*')
+    listOfFiles = glob.glob(file_path + '*.mat*')
 
     for i in range(len(listOfFiles)):
         listOfFiles[i] = listOfFiles[i].replace(file_path[:-1], '')
@@ -706,6 +706,7 @@ def read_save_timeseries_matlab(cell_id, file_path, engine, conn):
 
     df_file.sort_values(by=['filename'], inplace=True)
 
+    print(listOfFiles)
     if df_file.empty:
         return
 
@@ -730,8 +731,8 @@ def read_save_timeseries_matlab(cell_id, file_path, engine, conn):
 
         if os.path.exists(cellpath):
             f = h5py.File(cellpath)
-            batch = f['batch']
-            df_battery = convert_mat_to_df(batch)
+            #batch = f['batch']
+            df_battery = convert_mat_to_df(f)
             #df_cell = pd.ExcelFile(cellpath)
             
             # Find the time series sheet in the excel file
@@ -1264,7 +1265,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             if tester == 'voltaiq':
                 print("start import")
                 cycle_index_max = read_save_timeseries_voltaiq(cell_id, file_path, engine, conn) 
-
+            
             if tester == 'matlab':
                 if file_id == prev_file_id:
                     cycle_index_max = read_save_timeseries_matlab(cell_id, file_path, engine, conn)
