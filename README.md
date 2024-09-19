@@ -19,8 +19,9 @@ If you use ubuntu, you can run the following commands:
 ``` bash
 apt-get update
 
+apt-get install -y ca-certificates curl python3-pip
+
 # Installing Docker
-apt-get install ca-certificates curl
 
 apt-get install -m 0755 -d /etc/apt/keyrings
 
@@ -34,7 +35,7 @@ echo \
 
 apt-get update
 
-apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 ## Installation steps
 
@@ -76,9 +77,8 @@ You are now ready to add data and use the site.
 1. In the batteryarchive-agent folder, run: python3 -m pip install -r requirements.txt --break-system-packages
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes.
 3. cd scripts 
-4. To import sample cycle data: python3 data_import_agent.py -t cycle -m add -p ../data/cycle/  
-5. To import sample abuse data: python3 data_import_agent.py -t abuse -m add -p ../data/abuse/
-6. To refresh Redash Queries: ./bin/refresh_queries
+4. To import sample li-ion data: python3 data_import_agent.py ../data/'li-ion cell samples'/
+5. To refresh Redash Queries: ./bin/refresh_queries
 
 ## Populate your redash front end
 
