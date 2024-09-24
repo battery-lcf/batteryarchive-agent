@@ -12,17 +12,13 @@ Currently, the data_import_agent.py script supports files of matlab, json, arbin
 1. Open the data_import_agent.py script in your preferred code editor. If your file is one of the types listed above, head to the appropriate 'read_save_timeseries_filetype()' function.
     1. If not, you will need to write a new function. Duplicate one of the existing functions and make edits to fit your new file type. You will also need to create a new type selection in the add_ts_md_cycle() function.
 3. Open a data file you wish to import. Compare the column names of your file with the column naming section of the function (see image). 
-<img src="Desktop/check_columns.png">
+<img src="compare_columns.png">
 4. If the column names differ, edit the appropriate df_time_series_file['column name'] to match your data file.
 
 ## Running the import script
 1. Migrate to the batteryarchive-agent/scripts directory on your computer. Type the following command with the directory of your data.
-    1. Example: python3 data_import_agent.py /Users/lnkassa/Desktop/UCONNdata/
+    1. python3 'import_script' 'data_directory'
+    2. Example: python3 data_import_agent.py /Users/lnkassa/Desktop/UCONNdata/
 3. If the code completes successfully, check the database on pg admin to see if the data populated. Compare this data with your original data files.
-4. Open redash and refresh queries to
-**needs more details
-
-
-```python
-
-```
+4. Migrate back to the batteryarchive-agent directory and refresh queries by running ./bin/refresh_queries
+5. Open redash and your data should be populated.
