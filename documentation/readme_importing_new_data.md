@@ -13,6 +13,7 @@ Currently, the data_import_agent.py script supports files of matlab, json, arbin
     1. If not, you will need to write a new function. Duplicate one of the existing functions and make edits to fit your new file type. You will also need to create a new type selection in the add_ts_md_cycle() function.
 3. Open a data file you wish to import. Compare the column names of your file with the column naming section of the function (see image). 
 <img src="compare_columns.png">
+
 4. If the column names differ, edit the appropriate df_time_series_file['column name'] to match your data file.
 
 ## Running the import script
