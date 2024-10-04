@@ -2657,7 +2657,7 @@
             "id": 47,
             "data_source_id": 1,
             "name": "flowDischargeVoltageByStep",
-            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM flow_cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i<0 \n) t\nWHERE t.row % (select step from flow_cycle_metadata where cell_id = t.cell_id) = 0",
+            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM flow_cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i<0 \n) t\nWHERE t.row % (select index from flow_cycle_metadata where cell_id = t.cell_id) = 0",
             "visualizations": [
                 {
                     "id": 149,
@@ -2786,7 +2786,7 @@
             "id": 46,
             "data_source_id": 1,
             "name": "flowChargeVoltageByStep",
-            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM flow_cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i>0 \n) t\nWHERE t.row % (select step from flow_cycle_metadata where cell_id = t.cell_id) = 0",
+            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM flow_cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i>0 \n) t\nWHERE t.row % (select index from flow_cycle_metadata where cell_id = t.cell_id) = 0",
             "visualizations": [
                 {
                     "id": 147,
@@ -6538,7 +6538,7 @@
             "id": 24,
             "data_source_id": 1,
             "name": "Charge voltage by step",
-            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i>0 \n) t\nWHERE t.row % (select step from cycle_metadata where cell_id = t.cell_id) = 0",
+            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i>0 \n) t\nWHERE t.row % (select index from cycle_metadata where cell_id = t.cell_id) = 0",
             "visualizations": [
                 {
                     "id": 24,
@@ -6683,7 +6683,7 @@
             "id": 23,
             "data_source_id": 1,
             "name": "Discharge voltage by step",
-            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i<0 \n) t\nWHERE t.row % (select step from cycle_metadata where cell_id = t.cell_id) = 0 ",
+            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_time, v, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}} or cycle_index = {{Step_2}} or cycle_index = {{Step_3}}) and i<0 \n) t\nWHERE t.row % (select index from cycle_metadata where cell_id = t.cell_id) = 0 ",
             "visualizations": [
                 {
                     "id": 23,
@@ -6927,7 +6927,7 @@
             "id": 19,
             "data_source_id": 1,
             "name": "Validate cycle test time series",
-            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_index, test_time, cycle_time, ah_d, e_d, ah_c, e_c, v, i, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}}) \n) t\nWHERE t.row % (select step from cycle_metadata where cell_id = t.cell_id) = 0  ",
+            "query": "SELECT t.*\nFROM (\n  SELECT cell_id, cycle_index, test_time, cycle_time, ah_d, e_d, ah_c, e_c, v, i, cell_id  || ' ' || cycle_index as label, row_number() OVER(ORDER BY cell_id, test_time ASC) AS row\n  FROM cycle_timeseries where cell_id IN ({{cell_id}}) and (cycle_index = {{Step_1}}) \n) t\nWHERE t.row % (select index from cycle_metadata where cell_id = t.cell_id) = 0  ",
             "visualizations": [
                 {
                     "id": 19,
