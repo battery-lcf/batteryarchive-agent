@@ -231,7 +231,7 @@ class RedashClient():
         dash_obj.queries = queries
 
         return dash_obj
-
+    
     def get_all_dashboards(self) -> List[Dashboard]:
         """Get all of the dashboards from the server
 
@@ -258,7 +258,23 @@ class RedashClient():
             
             
         return dashboards_list
-        
+
+    def archive_dashboard_by_slug(self,dashboard_id: int) -> None:
+        try:
+            res = requests.delete(self.dashboards_path+f"/{dashboard_id}", headers=self.headers)
+            print(res.request.url)
+            if res.status_code != 200: 
+                print(f"Error archiving dashboard: {res.content}")
+        except Exception as e:
+            raise(e)
+    
+    def archive_dashboards(self) -> None:
+        try:
+            dashboards = self.get_all_dashboards()
+            for d in dashboards:
+                self.archive_dashboard_by_slug(d.id)
+        except Exception as e:
+            raise(e)
 
     def refresh_query_results(self, query_id:int, params:Dict) -> None:
         """_summary_
@@ -281,7 +297,25 @@ class RedashClient():
             raise(e)
 
         return query_result
-
+    
+    def archive_query_by_id(self, query_id: int) -> None:
+        try:
+            res = requests.delete(self.queries_path+f"/{query_id}", headers=self.headers)
+            if (res.status_code != 200):
+                print(f"Error archiving the query: {res.content}")
+        except Exception as e:
+            raise(e)
+    
+    def archive_queries(self) -> None:
+        """
+        Archive all queries
+        """
+        try:
+            queries = self.get_all_queries()
+            for q in queries:
+                self.archive_query_by_id(q.id)
+        except Exception as e:
+            raise(e)
 
     def get_query_results(self, query_id:int) -> Dict:
         """Get the result
