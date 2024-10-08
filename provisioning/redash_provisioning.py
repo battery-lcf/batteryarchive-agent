@@ -155,7 +155,6 @@ def refresh_queries(redash_url, redash_key):
 @click.option('--redash-key', help="Redash API Key to use", required=True, type=str)
 def remove_dashboards(redash_url, redash_key):
     client = RedashClient(redash_key=redash_key, redash_url=redash_url)
-    print(client.get_all_dashboards())
     client.archive_dashboards()
             
 @click.command()

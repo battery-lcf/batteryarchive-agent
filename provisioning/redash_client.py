@@ -264,7 +264,6 @@ class RedashClient():
     def archive_dashboard_by_id(self,dashboard_id: int) -> None:
         try:
             res = requests.delete(self.dashboards_path+f"/{dashboard_id}", headers=self.headers)
-            print(res.request.url)
             if res.status_code != 200: 
                 print(f"Error archiving dashboard: {res.content}")
         except Exception as e:
@@ -395,8 +394,7 @@ class RedashClient():
 
 
         except Exception as e:
-            print(e)
-
+            raise(e)
             
         return queries_list
 
