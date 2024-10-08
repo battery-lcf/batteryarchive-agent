@@ -4,6 +4,8 @@ import json
 
 from redash_entites import Dashboard, Query, Visualization, Widget
 
+DEFAULT_PAGE_SIZE = 25
+
 class RedashClient():
 
     def __init__(self, redash_key:str, redash_url:str="http://localhost/api") -> None:
@@ -259,7 +261,7 @@ class RedashClient():
             
         return dashboards_list
 
-    def archive_dashboard_by_slug(self,dashboard_id: int) -> None:
+    def archive_dashboard_by_id(self,dashboard_id: int) -> None:
         try:
             res = requests.delete(self.dashboards_path+f"/{dashboard_id}", headers=self.headers)
             print(res.request.url)
@@ -272,7 +274,7 @@ class RedashClient():
         try:
             dashboards = self.get_all_dashboards()
             for d in dashboards:
-                self.archive_dashboard_by_slug(d.id)
+                self.archive_dashboard_by_id(d.id)
         except Exception as e:
             raise(e)
 
@@ -375,20 +377,26 @@ class RedashClient():
         queries_list = []
         raw_queries:dict = {}
         try:
-            # TODO Create real pagination here
-            res = requests.get(self.queries_path+"?page_size=100", headers=self.headers)
+            res = requests.get(self.queries_path, headers=self.headers)
             raw_queries = res.json()
+            count = raw_queries.get('count', 0)
+            page_size = raw_queries.get('page_size', DEFAULT_PAGE_SIZE)
+            if count == 0:
+                return queries_list
+            if count <= page_size:
+                for query in raw_queries.get('results', []):
+                    queries_list.append(self.get_query(query['id']))
+            else:
+                for i in range(1, int(count / page_size)+1):
+                    res = requests.get(self.queries_path, params={"page": i}, headers=self.headers)
+                    raw_queries = res.json()
+                    for query in raw_queries.get('results', []):
+                        queries_list.append(self.get_query(query['id']))
+
 
         except Exception as e:
             print(e)
 
-
-        if len(raw_queries['results']) < 1:
-            return queries_list
-
-        for query in raw_queries['results']:
-            queries_list.append(self.get_query(query['id']))
-            
             
         return queries_list
 
