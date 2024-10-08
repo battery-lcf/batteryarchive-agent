@@ -83,18 +83,15 @@ def calc_cycle_quantities(df):
 
 
 # calculate statistics and cycle time
-def calc_stats(df_t, ID):
-
+def calc_stats(df_t, ID, engine):
     logging.info('calculate cycle time and cycle statistics')
     df_t['cycle_time'] = 0
-
     no_cycles = int(df_t['cycle_index'].max())
-
     # Initialize the cycle_data time frame
-    a = [0 for x in range(no_cycles)]  # using loops
-
+    a = [x for x in range(no_cycles-30, no_cycles)]  # using loops
     df_c = pd.DataFrame(data=a, columns=["cycle_index"]) 
-
+    
+    #'cmltv' = 'cumulative'
     df_c['cell_id'] = ID
     df_c['cycle_index'] = 0
     df_c['v_max'] = 0
@@ -105,14 +102,21 @@ def calc_stats(df_t, ID):
     df_c['ah_d'] = 0
     df_c['e_c'] = 0
     df_c['e_d'] = 0
+    with engine.connect() as conn:
+        init = pd.read_sql("select max(e_c_cmltv) from flow_cycle_stats where cell_id='"+ID+"'", conn).iloc[0,0] #for continuity btwn calc_stats calls
+        init = 0 if init == None else init
+        df_c['e_c_cmltv'] = init 
+        init = pd.read_sql("select max(e_d_cmltv) from flow_cycle_stats where cell_id='"+ID+"'", conn).iloc[0,0]
+        init = 0 if init == None else init
+    df_c['e_d_cmltv'] = init 
     df_c['v_c_mean'] = 0
     df_c['v_d_mean'] = 0
     df_c['test_time'] = 0
     df_c['ah_eff'] = 0
     df_c['e_eff'] = 0
-
+    df_c['e_eff_cmltv'] = 0
     convert_dict = {'cell_id': str,
-                'cycle_index': float,
+                'cycle_index': int,
                 'v_max': float,
                 'i_max': float,
                 'v_min': float,
@@ -121,81 +125,81 @@ def calc_stats(df_t, ID):
                 'ah_d': float,
                 'e_c': float,
                 'e_d': float,
+                'e_c_cmltv': float,
+                'e_d_cmltv': float,
                 'v_c_mean': float,
                 'v_d_mean': float,
                 'test_time': float,
                 'ah_eff': float,
-                'e_eff': float
+                'e_eff': float,
+                'e_eff_cmltv': float
             }
  
     df_c = df_c.astype(convert_dict)
-
     for c_ind in df_c.index:
-        x = c_ind + 1
-
+        #x = c_ind + 1
+        x = no_cycles + c_ind - 29
+        
         df_f = df_t[df_t['cycle_index'] == x]
-
         df_f['ah_c'] = 0
         df_f['e_c'] = 0
         df_f['ah_d'] = 0
         df_f['e_d'] = 0
-
+        df_f['w'] = 0
+        
         if not df_f.empty:
-
             try:
-
                 df_c.iloc[c_ind, df_c.columns.get_loc('cycle_index')] = x
-
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_max')] = df_f.loc[df_f['v'].idxmax()].v
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_min')] = df_f.loc[df_f['v'].idxmin()].v
-
                 df_c.iloc[c_ind, df_c.columns.get_loc('i_max')] = df_f.loc[df_f['i'].idxmax()].i
                 df_c.iloc[c_ind, df_c.columns.get_loc('i_min')] = df_f.loc[df_f['i'].idxmin()].i
-
                 df_c.iloc[c_ind, df_c.columns.get_loc('test_time')] = df_f.loc[df_f['test_time'].idxmax()].test_time
-
+                
                 df_f['dt'] = df_f['test_time'].diff() / 3600.0
                 df_f_c = df_f[df_f['i'] > 0]
                 df_f_d = df_f[df_f['i'] < 0]
-
                 df_f = calc_cycle_quantities(df_f)
-
-                #df_t.loc[df_t.cycle_index == x, 'cycle_time'] = df_f['cycle_time']
+                df_t['cycle_time'] = df_t['cycle_time'].astype('float64') #to address dtype warning
+                
+                df_t.loc[df_t.cycle_index == x, 'cycle_time'] = df_f['cycle_time']
                 df_t.loc[df_t.cycle_index == x, 'ah_c'] = df_f['ah_c']
                 df_t.loc[df_t.cycle_index == x, 'e_c'] = df_f['e_c']
                 df_t.loc[df_t.cycle_index == x, 'ah_d'] = df_f['ah_d']
                 df_t.loc[df_t.cycle_index == x, 'e_d'] = df_f['e_d']
-
+                df_t.loc[df_t.cycle_index == x, 'w'] = df_f['i'] * df_f['v'] #power
                 df_c.iloc[c_ind, df_c.columns.get_loc('ah_c')] = df_f['ah_c'].max()
                 df_c.iloc[c_ind, df_c.columns.get_loc('ah_d')] = df_f['ah_d'].max()
                 df_c.iloc[c_ind, df_c.columns.get_loc('e_c')] = df_f['e_c'].max()
                 df_c.iloc[c_ind, df_c.columns.get_loc('e_d')] = df_f['e_d'].max()
-
+                df_c.iloc[c_ind, df_c.columns.get_loc('e_c_cmltv')] = df_f['e_c'].max() + df_c.iloc[c_ind-1,df_c.columns.get_loc('e_c_cmltv')]
+                df_c.iloc[c_ind, df_c.columns.get_loc('e_d_cmltv')] = df_f['e_d'].max() + df_c.iloc[c_ind-1,df_c.columns.get_loc('e_d_cmltv')]
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_c_mean')] = df_f_c['v'].mean()
                 df_c.iloc[c_ind, df_c.columns.get_loc('v_d_mean')] = df_f_d['v'].mean()
-
                 if df_c.iloc[c_ind, df_c.columns.get_loc('ah_c')] == 0:
                     df_c.iloc[c_ind, df_c.columns.get_loc('ah_eff')] = 0
                 else:
                     df_c.iloc[c_ind, df_c.columns.get_loc('ah_eff')] = df_c.iloc[c_ind, df_c.columns.get_loc('ah_d')] / \
                                                                        df_c.iloc[c_ind, df_c.columns.get_loc('ah_c')]
-
                 if df_c.iloc[c_ind, df_c.columns.get_loc('e_c')] == 0:
                     df_c.iloc[c_ind, df_c.columns.get_loc('e_eff')] = 0
                 else:
                     df_c.iloc[c_ind, df_c.columns.get_loc('e_eff')] = df_c.iloc[c_ind, df_c.columns.get_loc('e_d')] / \
                                                                       df_c.iloc[c_ind, df_c.columns.get_loc('e_c')]
-
+                    
+                if df_c.iloc[c_ind, df_c.columns.get_loc('e_c_cmltv')] == 0:
+                    df_c.iloc[c_ind, df_c.columns.get_loc('e_eff_cmltv')] = 0
+                else:
+                    df_c.iloc[c_ind, df_c.columns.get_loc('e_eff_cmltv')] = df_c.iloc[c_ind, df_c.columns.get_loc('e_d_cmltv')] / \
+                                                                      df_c.iloc[c_ind, df_c.columns.get_loc('e_c_cmltv')]
             except Exception as e:
                 logging.info("Exception @ x: " + str(x))
                 logging.info(e)
                 
     logging.info("cycle: " + str(x))
     logging.info("cell_id: "+ df_c['cell_id'])
-
     df_cc = df_c[df_c['cycle_index'] > 0]
     df_tt = df_t[df_t['cycle_index'] > 0]
-
     return df_cc, df_tt
 
 
@@ -599,7 +603,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             logging.info('save cell metadata')
             df_cell_md.to_sql('flow_cell_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
             logging.info('save cycle metadata')
-            df_cycle_md.to_sql('cycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
+            df_cycle_md.to_sql('flow_ßcycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
 
             status = 'buffering'
 
@@ -656,7 +660,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
 
                     if not df_ts.empty:
                         start_time = time.time()
-                        df_cycle_stats, df_cycle_timeseries = calc_stats(df_ts, cell_id)
+                        df_cycle_stats, df_cycle_timeseries = calc_stats(df_ts, cell_id, engine)
                         print("calc_stats time: " + str(time.time() - start_time))
                         logging.info("calc_stats time: " + str(time.time() - start_time))
 
@@ -670,8 +674,6 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
                         print("save timeseries time: " + str(time.time() - start_time))
                         logging.info("save timeseries time: " + str(time.time() - start_time))
 
-                        # get_cycle_index_max(cell_id,conn)
-                        # get_cycle_stats_index_max(cell_id, conn)
 
             status='completed'
 
