@@ -74,10 +74,10 @@ During installation a sample database is added. You can use the database to impo
 
 You are now ready to add data and use the site.
 
-1. In the batteryarchive-agent folder, run: python3 -m pip install -r requirements.txt --break-system-packages
+1. In the batteryarchive-agent folder, run: `python3 -m pip install -r requirements.txt --break-system-packages`
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes.
 3. cd scripts 
-4. To import sample li-ion data: python3 data_import_agent.py ../data/'li-ion cell samples'/
+4. To import sample li-ion data: `python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/`
 5. cd ..
 6. To refresh Redash Queries: ./bin/refresh_queries
 
