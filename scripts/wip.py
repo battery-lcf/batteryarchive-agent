@@ -50,27 +50,27 @@ class abstractDataType():
 
             print(df_tmp)
 
-            df_cell_md, df_cycle_md = self.populate_cycle_metadata(df_tmp) ##rconflict??
+            df_cell_md, df_cycle_md = self.populate_cycle_metadata(df_tmp) ##conflict module?
 
             engine = create_engine(conn)
 
             # check if the cell is already there and report status
 
-            status = self.check_cell_status(cell_id, conn)
+            status = self.check_cell_status(cell_id, conn) ##conflict module
 
             if status=="completed":
-                print("skip cell_id: " + cell_id)
+                print("skip cell_id: " + cell_id + '\n') ##conflict module
 
             if status=='new': 
 
-                logging.info('save cell metadata')
+                logging.info('save cell metadata') ##conflict module
                 df_cell_md.to_sql(self.cell_metadata_table, con=engine, if_exists='append', chunksize=1000, index=False)##rconflict
                 logging.info('save cycle metadata')
                 df_cycle_md.to_sql(self.cycle_metadata_table, con=engine, if_exists='append', chunksize=1000, index=False)##rconflict
 
                 status = 'buffering'
 
-                self.set_cell_status(cell_id, status, conn)
+                self.set_cell_status(cell_id, status, conn)##conflict
             if status=='buffering':
                 print("buffering cell_id: " + cell_id)
 
@@ -409,14 +409,14 @@ class abstractDataType():
     
     def check_cell_status(self, cell_id, conn):
         status = 'new'
-        sql_str = "select * from " + self.cell_metadata_table + " where cell_id = '" + cell_id + "'" ##rconflict
+        sql_str = "select status from " + self.cell_metadata_table + " where cell_id = '" + cell_id + "'" ##rconflict
         db_conn = psycopg2.connect(conn)
         curs = db_conn.cursor()
         curs.execute(sql_str)
         db_conn.commit()
         record = curs.fetchall()
         if record: 
-            status = record[0][16] ##conflict, see joseph's code
+            status = record[0][0] ##rconflict, see joseph's code
         else:
             status = 'new'
         curs.close()
@@ -458,7 +458,7 @@ class abstractDataType():
             print("record: " + str(record))
             sheetnames = record
         else:
-            print("empty list")
+            print("no sheets buffered")
         return sheetnames
 
 class liCellCsv(abstractDataType):
@@ -523,7 +523,7 @@ class liCellCsv(abstractDataType):
                 start_time = time.time()
 
             except KeyError as e:
-                print("I got a KeyError - reason " + str(e))
+                print("I got a KeyError - reason: " + str(e))
                 print("processing: time: " + str(time.time() - start_time))##weird
                 start_time = time.time()
 
@@ -542,11 +542,14 @@ class liCellArbin(abstractDataType):
     def buffer(self, cell_id, source, cellpath, filename, sheetnames, engine, start_time):
         cycle_index_max = 0
         if os.path.exists(cellpath):
-            df_cell = pd.ExcelFile(cellpath)
+            try:
+                df_cell = pd.ExcelFile(cellpath)
+            except ValueError as e:
+                print('\nI got a ValueError - reason: ' + str(e))
+                print('Make sure metadata and data files (and hidden files) are closed. \n')
             # Find the time series sheet in the excel file
 
             for k in df_cell.sheet_names:
-
                 unread_sheet = True
                 sheetname = filename + "|" + k
 
@@ -605,6 +608,9 @@ class liModule(abstractDataType):
         self.buffer_table = 'cycle_timeseries_buffer'
         self.stats_table = 'cycle_stats'
 
+    def buffer(cell_id, source, cellpath, filename, sheetnames, engine, start_time):
+
+        return
 def main(argv):
 
     # command line variables that can be used to run from an IDE without passing arguments
@@ -618,11 +624,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "ht:p:", ["dataType=","path="])
     except getopt.GetoptError:
-        print('run as: data_import_agent.py <path>')
+        print('run as: data_import_agent.py -t <dataType> -p <path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('run as: data_import_agent.py <path>')
+            print('run as: data_import_agent.py -t <dataType> -p <path>')
             sys.exit()
         elif opt in ("-p", "--path"):
             path = arg
@@ -669,6 +675,7 @@ def main(argv):
         elif tester == 'arbin':
             imp = liCellArbin()
     elif data_type == 'li-module':
+        df_excel = pd.read_excel(path + "module_list.xlsx")
         imp = liModule()
     imp.add_data(df_excel, conn, save, plot, path, slash)
 

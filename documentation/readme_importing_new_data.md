@@ -16,10 +16,33 @@ Currently, the data_import_agent.py script supports files of matlab, json, arbin
 
 4. If the column names differ, edit the appropriate df_time_series_file['column name'] to match your data file.
 
-## Running the import script
+## Running the import script (General)
 1. Migrate to the batteryarchive-agent/scripts directory on your computer. Type the following command with the directory of your data. The choices for 'batt_type' are 'li-cell', 'li-module', 'flow-cell', and 'flow-stack'.
-    1. python3 data_import_agent.py -s 'batt_type' -p 'data_directory'
-    2. Example: python3 data_import_agent.py -s 'li-cell' -p /Users/lnkassa/Desktop/UCONNdata/
+    1. `python3 data_import_agent.py -s 'batt_type' -p 'data_directory'`
 3. If the code completes successfully, check the database on pg admin to see if the data populated. Compare this data with your original data files.
 4. Migrate back to the batteryarchive-agent directory and refresh queries by running ./bin/refresh_queries
 5. Open redash and your data should be populated.
+
+### Import example:
+``` bash
+cd batteryarchive-agent/scripts
+
+python3 data_import_agent.py -s 'li-cell' -p /Users/lnkassa/Desktop/UCONNdata/
+
+cd ..
+
+./bin/refresh_queries
+```
+
+## Importing sample data
+``` bash
+cd batteryarchive-agent/scripts
+
+python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/
+
+python3 data_import_agent.py -s 'li-module' -p ../data/li-ion_module_samples/
+
+python3 data_import_agent.py -s 'flow-cell' -p ../data/flow_cell_samples/
+
+python3 data_import_agent.py -s 'flow-stack' -p ../data/flow_stack_samples/
+```
