@@ -78,7 +78,8 @@ You are now ready to add data and use the site.
 2. Import sample data by running the following commands from the project root folder. Importing data may take a few minutes.
 3. cd scripts 
 4. To import sample li-ion data: `python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/`
-5. To refresh Redash Queries: ./bin/refresh_queries
+5. cd ..
+6. To refresh Redash Queries: ./bin/refresh_queries
 
 ## Populate your redash front end
 
