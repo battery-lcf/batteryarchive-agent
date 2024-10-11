@@ -9,7 +9,7 @@ Example given for UCONN dataset: UCONN folder has file named cell_list and a fol
 ## Updating the importer script
 Currently, the data_import_agent.py script supports files of matlab, json, arbin, voltaiq-csv, and generic-csv. However, the exact structure of the files you have versus what the importer already uses may be different or you might have a completely new file type.
 
-1. Open the data_import_agent.py script in your preferred code editor. If your file is one of the types listed above, head to the appropriate 'read_save_timeseries_filetype()' function.
+1. Open the x_data_import_agent.py (where x is your battery type) script in your preferred code editor. If your file is one of the types listed above, head to the appropriate 'read_save_timeseries_filetype()' function.
     1. If not, you will need to write a new function. Duplicate one of the existing functions and make edits to fit your new file type. You will also need to create a new type selection in the add_ts_md_cycle() function.
 3. Open a data file you wish to import. Compare the column names of your file with the column naming section of the function (see image). 
 <img src="compare_columns.png">
