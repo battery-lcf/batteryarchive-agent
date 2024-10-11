@@ -4391,7 +4391,7 @@
                         "type": "enum",
                         "global": false,
                         "locals": [],
-                        "enumOptions": "500\n1000\n2000",
+                        "enumOptions": "1\n10\n50\n100\n500\n1000\n2000",
                         "value": "1000"
                     }
                 ]
