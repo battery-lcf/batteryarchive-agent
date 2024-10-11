@@ -33,16 +33,14 @@ class abstractDataType():
         self.stats_table = ''
 
     #add cells to the database
-    def add_data(self, cell_list, conn, save, plot, path, slash): ##conflict how to pass all tables
+    def add_data(self, df_excel, conn, save, plot, path, slash): ##conflict how to pass all tables
         logging.info('add cells')
-        df_excel = pd.read_excel(cell_list)
 
         # Process one cell at the time
         for ind in df_excel.index:
 
             cell_id = df_excel['cell_id'][ind]
             file_id = df_excel['file_id'][ind]
-            tester = df_excel['tester'][ind]
             file_type = df_excel['file_type'][ind]
             source = df_excel['source'][ind]
 
@@ -531,6 +529,82 @@ class liCellCsv(abstractDataType):
 
         return cycle_index_max
     
+class liCellArbin(abstractDataType):
+    def __init__(self):
+        super().__init__()
+        self.batt_type = 'li-ion'
+        self.cell_metadata_table = 'cell_metadata'
+        self.cycle_metadata_table = 'cycle_metadata'
+        self.timeseries_table = 'cycle_timeseries'
+        self.buffer_table = 'cycle_timeseries_buffer'
+        self.stats_table = 'cycle_stats'
+
+    def buffer(self, cell_id, source, cellpath, filename, sheetnames, engine, start_time):
+        cycle_index_max = 0
+        if os.path.exists(cellpath):
+            df_cell = pd.ExcelFile(cellpath)
+            # Find the time series sheet in the excel file
+
+            for k in df_cell.sheet_names:
+
+                unread_sheet = True
+                sheetname = filename + "|" + k
+
+                try:
+                    sheetnames.index(sheetname)
+                    print("found:" + sheetname)
+                    unread_sheet = False
+                except ValueError:
+                    print("not found:" + sheetname)
+
+                if "hannel" in k and  k != "Channel_Chart" and unread_sheet:
+                    logging.info("file: " + filename + " sheet:" + str(k))
+                    timeseries = k
+
+                    df_time_series_file = pd.read_excel(df_cell, sheet_name=timeseries)
+
+                    df_time_series = pd.DataFrame()
+
+                    try:
+
+                        df_time_series['cycle_index'] = df_time_series_file['Cycle_Index']
+                        df_time_series['test_time'] = df_time_series_file['Test_Time(s)']
+                        df_time_series['i'] = df_time_series_file['Current(A)']
+                        df_time_series['v'] = df_time_series_file['Voltage(V)']
+                        df_time_series['date_time'] = df_time_series_file['Date_Time']
+                        df_time_series['cell_id'] = cell_id
+                        df_time_series['sheetname'] = filename + "|" + timeseries
+
+                        cycle_index_file_max = df_time_series.cycle_index.max()
+
+                        if cycle_index_file_max > cycle_index_max:
+                            cycle_index_max = cycle_index_file_max
+
+                        print('saving sheet: ' + timeseries + ' with max cycle: ' +str(cycle_index_file_max))
+
+                        df_time_series.to_sql('cycle_timeseries_buffer', con=engine, if_exists='append', chunksize=1000, index=False)
+
+                        print("saved=" + timeseries + " time: " + str(time.time() - start_time))
+
+                        start_time = time.time()
+
+                    except KeyError as e:
+                        print("I got a KeyError - reason " + str(e))
+                        print("processing:" + timeseries + " time: " + str(time.time() - start_time))
+                        start_time = time.time()
+
+        return cycle_index_max
+
+class liModule(abstractDataType):
+    def __init__(self):
+        super().__init__()
+        self.batt_type = 'li-module'
+        self.module_metadata_table = 'module_metadata'
+        self.cycle_metadata_table = 'cycle_metadata'
+        self.timeseries_table = 'cycle_timeseries'
+        self.buffer_table = 'cycle_timeseries_buffer'
+        self.stats_table = 'cycle_stats'
+
 def main(argv):
 
     # command line variables that can be used to run from an IDE without passing arguments
@@ -542,8 +616,7 @@ def main(argv):
     logging.info('starting')
 
     try:
-        opts, args = getopt.getopt(argv, "h")
-        path = args[0]
+        opts, args = getopt.getopt(argv, "ht:p:", ["dataType=","path="])
     except getopt.GetoptError:
         print('run as: data_import_agent.py <path>')
         sys.exit(2)
@@ -551,6 +624,10 @@ def main(argv):
         if opt == '-h':
             print('run as: data_import_agent.py <path>')
             sys.exit()
+        elif opt in ("-p", "--path"):
+            path = arg
+        elif opt in ("-t", "--dataType"):
+            data_type = arg
 
     # read database connection
     conn = ''
@@ -563,8 +640,8 @@ def main(argv):
                 conn =  j[1]
     except:
         print("Error opening env file:", sys.exc_info()[0])
-
-    # read configuration values
+    
+        # read configuration values
     data = yaml.safe_load(open('battery-blc-library.yaml'))
 
     plot = data['environment']['PLOT']
@@ -584,9 +661,16 @@ def main(argv):
     elif style == 'windows':
         slash = r'\\'
 
-    imp = liCellCsv()
-    imp.add_data(path + "cell_list.xlsx", conn, save, plot, path, slash)
-
+    if data_type == 'li-cell':
+        df_excel = pd.read_excel(path + "cell_list.xlsx")
+        tester = df_excel['tester'][0]
+        if tester == 'generic':
+            imp = liCellCsv()
+        elif tester == 'arbin':
+            imp = liCellArbin()
+    elif data_type == 'li-module':
+        imp = liModule()
+    imp.add_data(df_excel, conn, save, plot, path, slash)
 
 
 if __name__ == "__main__":
