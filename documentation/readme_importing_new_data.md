@@ -38,11 +38,37 @@ cd ..
 ``` bash
 cd batteryarchive-agent/scripts
 
+#importing li-ion cell sample
 python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/
+
+cd ..
+
+./bin/refresh_queries
+
+#importing li-ion module sample
+cd scripts
 
 python3 data_import_agent.py -s 'li-module' -p ../data/li-ion_module_samples/
 
+cd ..
+
+./bin/refresh_queries
+
+#importing flow cell sample
+cd .. 
+
 python3 data_import_agent.py -s 'flow-cell' -p ../data/flow_cell_samples/
 
+cd ..
+
+./bin/refresh_queries
+
+#importing flow stack sample
+cd scripts
+
 python3 data_import_agent.py -s 'flow-stack' -p ../data/flow_stack_samples/
+
+cd ..
+
+./bin/refresh_queries
 ```
