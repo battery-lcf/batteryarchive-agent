@@ -1,3 +1,10 @@
+# Sections:
+1. Getting the dataset ready for import
+2. Updating the import script
+3. Running the import script (general)
+4. Importing sample data
+5. Visualizing your newly-imported data
+
 ## Getting the dataset ready for import
 1.	Create a folder with a file named “cell_list” and a folder with data for each cell you want to upload. 
 Example given for UCONN dataset: UCONN folder has file named cell_list and a folder “G14C5” with all of the data for that particular cell. Sometimes all of the cell data may be in a single Excel/csv file. Sometimes the data may be in multiple files. The existing importers account for both situations.
@@ -6,13 +13,13 @@ Example given for UCONN dataset: UCONN folder has file named cell_list and a fol
 4.	Review the cell raw data files and, based on the file structure, identify which importer should be used in the overall import script. There are importers for several different kinds of battery testers and generic csv files. The appropriate selection should be noted in the ‘tester’ column of the cell_list file. See the 'Updating the importer script' section for more details.
 
 
-## Updating the importer script
+## Updating the import script
 Currently, the data_import_agent.py script supports files of matlab, json, arbin, voltaiq-csv, and generic-csv. However, the exact structure of the files you have versus what the importer already uses may be different or you might have a completely new file type.
 
 1. Open the x_data_import_agent.py (where x is your battery type) script in your preferred code editor. If your file is one of the types listed above, head to the appropriate 'read_save_timeseries_filetype()' function.
     1. If not, you will need to write a new function. Duplicate one of the existing functions and make edits to fit your new file type. You will also need to create a new type selection in the add_ts_md_cycle() function.
 3. Open a data file you wish to import. Compare the column names of your file with the column naming section of the function (see image). 
-<img src="compare_columns.png">
+<img src="images/compare_columns.png">
 
 4. If the column names differ, edit the appropriate df_time_series_file['column name'] to match your data file.
 
@@ -72,3 +79,16 @@ cd ..
 
 ./bin/refresh_queries
 ```
+
+## Visualizing your newly-imported data
+After importing your sample or desired data. 
+
+1. In your browser, go to localhost:5000/ or 0.0.0.0/
+2. A login page should appear #todo
+<img src="images/redash_login.png">
+3. Once you log in you should see your dashboards and queries. 
+<img src="images/redash_home.png">
+4. The 'list' dashboards show a list of cells/modules/stacks based on the filters you apply at the top.
+<img src="images/flow_cell_list.png">
+5. Through the dashboards page (4) or by clicking on a cell/module/stack in the list, you will find the dashboard with plots corresponding to the id you clicked.
+<img src="images/plots_flow.png">
