@@ -4,6 +4,7 @@
 3. Running the import script (general)
 4. Importing sample data
 5. Visualizing your newly-imported data
+6. Connecting server to PG admin
 
 ## Getting the dataset ready for import
 1.	Create a folder with a file named “cell_list” and a folder with data for each cell you want to upload. 
@@ -83,8 +84,8 @@ cd ..
 ## Visualizing your newly-imported data
 After importing your sample or desired data. 
 
-1. In your browser, go to localhost:5000/ or 0.0.0.0/
-2. A login page should appear #todo
+1. If you installed BA locally, go to localhost:5000/ in your browser. Otherwise, type the IP where you installed BA into the browser.
+2. A login page should appear. Use your login created at the ./bin/setup step when installing BA. It is also in the batteryarchive-agent/env file under `DEFAULT_EMAIL` and `ADMIN_PASSWORD`.
 <img src="images/redash_login.png">
 3. Once you log in you should see your dashboards and queries. 
 <img src="images/redash_home.png">
@@ -92,3 +93,10 @@ After importing your sample or desired data.
 <img src="images/flow_cell_list.png">
 5. Through the dashboards page (4) or by clicking on a cell/module/stack in the list, you will find the dashboard with plots corresponding to the id you clicked.
 <img src="images/plots_flow.png">
+
+## Connecting server to PG Admin
+1. Open PG admin and right click on 'Servers' in the 'Object Explorer'. Select 'Register' and 'Server...'
+<img src="images/new_server.png">
+2. A window should pop up. In the 'General' tab, name your server. This name is for you to recognize the server. In the 'Connection' tab enter the IP address, port, and password. The password is under `POSTGRES_PASSWORD` in the batteryarchive-agent/env file.
+<img src="images/register_server.png">
+3. Open the query tool (Tools>Query Tool) to query the data you entered. Explore the tables and columns under 'Tables.'
