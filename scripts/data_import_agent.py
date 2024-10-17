@@ -21,7 +21,7 @@ def main(argv):
             elif script == 'li-module':
                 script = 'module_data_import_agent'
             elif script == 'flow-stack':
-                script = 'flow_data_import_agent'
+                script = 'stack_data_import_agent'
         elif opt in ("-p", "--path"):
             path = arg
 
