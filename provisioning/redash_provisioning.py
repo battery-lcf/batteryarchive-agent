@@ -150,11 +150,25 @@ def refresh_queries(redash_url, redash_key):
                     except:
                         print(f"Unable to refresh {bq.get('queryId')} for {q.id}")
 
+@click.command()
+@click.option('--redash-url', help="Redash URL to connect to", required=True, type=str)
+@click.option('--redash-key', help="Redash API Key to use", required=True, type=str)
+def remove_dashboards(redash_url, redash_key):
+    client = RedashClient(redash_key=redash_key, redash_url=redash_url)
+    client.archive_dashboards()
             
+@click.command()
+@click.option('--redash-url', help="Redash URL to connect to", required=True, type=str)
+@click.option('--redash-key', help="Redash API Key to use", required=True, type=str)
+def remove_queries(redash_url, redash_key):
+    client = RedashClient(redash_key=redash_key, redash_url=redash_url)
+    client.archive_queries()
 
 cli.add_command(import_dashboards)
 cli.add_command(export_dashboards)
 cli.add_command(refresh_queries)
+cli.add_command(remove_dashboards)
+cli.add_command(remove_queries)
 
 if __name__ == '__main__':
     cli()

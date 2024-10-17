@@ -4,6 +4,8 @@ import json
 
 from redash_entites import Dashboard, Query, Visualization, Widget
 
+DEFAULT_PAGE_SIZE = 25
+
 class RedashClient():
 
     def __init__(self, redash_key:str, redash_url:str="http://localhost/api") -> None:
@@ -231,7 +233,7 @@ class RedashClient():
         dash_obj.queries = queries
 
         return dash_obj
-
+    
     def get_all_dashboards(self) -> List[Dashboard]:
         """Get all of the dashboards from the server
 
@@ -258,7 +260,22 @@ class RedashClient():
             
             
         return dashboards_list
-        
+
+    def archive_dashboard_by_id(self,dashboard_id: int) -> None:
+        try:
+            res = requests.delete(self.dashboards_path+f"/{dashboard_id}", headers=self.headers)
+            if res.status_code != 200: 
+                print(f"Error archiving dashboard: {res.content}")
+        except Exception as e:
+            raise(e)
+    
+    def archive_dashboards(self) -> None:
+        try:
+            dashboards = self.get_all_dashboards()
+            for d in dashboards:
+                self.archive_dashboard_by_id(d.id)
+        except Exception as e:
+            raise(e)
 
     def refresh_query_results(self, query_id:int, params:Dict) -> None:
         """_summary_
@@ -281,7 +298,25 @@ class RedashClient():
             raise(e)
 
         return query_result
-
+    
+    def archive_query_by_id(self, query_id: int) -> None:
+        try:
+            res = requests.delete(self.queries_path+f"/{query_id}", headers=self.headers)
+            if (res.status_code != 200):
+                print(f"Error archiving the query: {res.content}")
+        except Exception as e:
+            raise(e)
+    
+    def archive_queries(self) -> None:
+        """
+        Archive all queries
+        """
+        try:
+            queries = self.get_all_queries()
+            for q in queries:
+                self.archive_query_by_id(q.id)
+        except Exception as e:
+            raise(e)
 
     def get_query_results(self, query_id:int) -> Dict:
         """Get the result
@@ -341,20 +376,25 @@ class RedashClient():
         queries_list = []
         raw_queries:dict = {}
         try:
-            # TODO Create real pagination here
-            res = requests.get(self.queries_path+"?page_size=100", headers=self.headers)
+            res = requests.get(self.queries_path, headers=self.headers)
             raw_queries = res.json()
+            count = raw_queries.get('count', 0)
+            page_size = raw_queries.get('page_size', DEFAULT_PAGE_SIZE)
+            if count == 0:
+                return queries_list
+            if count <= page_size:
+                for query in raw_queries.get('results', []):
+                    queries_list.append(self.get_query(query['id']))
+            else:
+                for i in range(1, int(count / page_size)+1):
+                    res = requests.get(self.queries_path, params={"page": i}, headers=self.headers)
+                    raw_queries = res.json()
+                    for query in raw_queries.get('results', []):
+                        queries_list.append(self.get_query(query['id']))
+
 
         except Exception as e:
-            print(e)
-
-
-        if len(raw_queries['results']) < 1:
-            return queries_list
-
-        for query in raw_queries['results']:
-            queries_list.append(self.get_query(query['id']))
-            
+            raise(e)
             
         return queries_list
 
