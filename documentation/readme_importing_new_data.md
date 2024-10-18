@@ -63,7 +63,7 @@ cd ..
 ./bin/refresh_queries
 
 #importing flow cell sample
-cd .. 
+cd scripts 
 
 python3 data_import_agent.py -s 'flow-cell' -p ../data/flow_cell_samples/
 
