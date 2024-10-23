@@ -41,23 +41,7 @@ Python Modules:\
 |add_ts_md_cycle(cell_list, conn, save, plot, path, slash):| Import new data file(s) by checking the status and calling the appropriate function for the data type. Saves the data from the buffer to the timeseries table.
 |main(argv):| Sets up command line run capability
 
-## Unused Functions
-| Function | Description |
-| -------- | ----------- |
-| listToString(s): | Converts a list to a string |
-| read_timeseries_arbin(cell_id, file_path): | old version of read_save_timeseries_arbin()? |
-| sort_timeseries(df_tmerge): | Sorts imported data to ensure cycle index and test times are correctly calculated |
-| populate_abuse_metadata(df_c_md): | Loads abuse metadata into the abuse metadata table |
-| execute_query(sql_str, conn) | Generally used to execute a query given as a parameter, only called in update_cells() |
-| delete_records(cell_id, conn): | Deletes imported data from tables |
-| calc_abuse_stats(df_t, df_test_md): | Calculates statistics for abuse stats table |
-| read_ornlabuse(file_path, cell_id): | Loads ornl abuse data into the buffer table |
-| read_snlabuse(file_path, cell_id): | Loads snl abuse data into the buffer table |
-| add_ts_md_abuse(cell_list, conn, save, plot, path, slash): | Import new abuse data file(s) by checking the status and calling the appropriate function for the data type. Saves the data from the buffer to the timeseries table. |
-| generate_cycle_data(cell_id, conn, path): | Export stats data to csv files |
-| generate_timeseries_data(cell_id, conn, path): | Export timeseries data to csv files |
-| export_cells(cell_list, conn, path): | Calls the previous two functions |
-| update_cells(conn, save, plot): | Add new calculated quantities to cells previously imported, or update existing calculated statistics |
+
 
 
 ```
