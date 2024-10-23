@@ -432,21 +432,6 @@ def import_stack_data_into_buffer(df_configuration: pd.DataFrame, df_stack_data:
         else:
             set_cell_status(cell_id, "processing", engine)
 
-
-    cell_metadata_table = Table("flow_cell_metadata", metadata_obj, autoload_with=engine)
-    cells_to_process_stmt = select(cell_metadata_table.c.cell_id).where(cell_metadata_table.c.status=="processing")
-    with engine.connect() as conn:
-        result = conn.execute(cells_to_process_stmt)
-        cells_to_process = [item[0] for item in result]
-    for cell_id in cells_to_process:
-        process_cell_timeseries_data(cell_id, engine)
-        clear_buffer(cell_id, engine)
-        set_cell_status(cell_id, "completed", engine)
-    if get_stack_status(stack_id, engine) == "processing":
-        process_cell_timeseries_data(stack_id, engine, "stack")
-        clear_buffer(stack_id, engine)
-        set_stack_status(stack_id, "completed", engine)
-
 def process_stack_data(stack_id, engine):
     cell_metadata_table = Table("flow_cell_metadata", metadata_obj, autoload_with=engine)
     cells_to_process_stmt = select(cell_metadata_table.c.cell_id).where(cell_metadata_table.c.status=="processing")
@@ -465,7 +450,6 @@ def process_stack_data(stack_id, engine):
 def process_cell_timeseries_data(cell_id, engine, component_level="cell"):
     # read the data back in chunks.
     block_size = 30
-    print('hello')
     buffer_table = Table("flow_cycle_timeseries_buffer", metadata_obj, autoload_with=engine)
 
     cycle_index_max = get_cycle_index_max(cell_id, engine)
