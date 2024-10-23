@@ -1006,7 +1006,7 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        status = record[0][9]
+        status = record[0][10]
     else:
         status = 'new'
 
