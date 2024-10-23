@@ -603,7 +603,7 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             logging.info('save cell metadata')
             df_cell_md.to_sql('flow_cell_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
             logging.info('save cycle metadata')
-            df_cycle_md.to_sql('flow_ßcycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
+            df_cycle_md.to_sql('flow_cycle_metadata', con=engine, if_exists='append', chunksize=1000, index=False)
 
             status = 'buffering'
 
