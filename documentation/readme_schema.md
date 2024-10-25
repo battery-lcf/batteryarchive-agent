@@ -55,7 +55,7 @@ For cell-level cycle data, there are five tables for li-on and five for flow bat
 | cell_id         | text             | unique id for each cell |
 | component_level | text             | denotes whether row corresponds to a 'cell' or 'module' |
 
-## Table: Cycle Timeseries and Cycle Timeseries Buffer$^{*}$ 
+## Table: Cycle Timeseries and Cycle Timeseries Buffer* 
 ### Purpose: Contains li-ion timeseries data. 
 *The buffer table is identical to the timeseries table except with a sheetname column to note the sheetname if there are multiple sheets in a data file. See the code documentation for more information.
 | Column           | Data Type        | Description | Units |

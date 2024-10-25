@@ -996,7 +996,7 @@ def check_cell_status(cell_id,conn):
 
     status = 'new'
 
-    sql_str = "select * from cell_metadata where cell_id = '" + cell_id + "'"
+    sql_str = "select status from cell_metadata where cell_id = '" + cell_id + "'"
 
     db_conn = psycopg2.connect(conn)
     curs = db_conn.cursor()
@@ -1006,7 +1006,7 @@ def check_cell_status(cell_id,conn):
     record = curs.fetchall()
 
     if record: 
-        status = record[0][10]
+        status = record[0][0]
     else:
         status = 'new'
 
