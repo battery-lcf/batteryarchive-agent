@@ -76,7 +76,7 @@ python3 -m pip install -r requirements.txt --break-system-packages
 ```
 2. Import li-ion cell sample data by running the following commands from the project root folder. Importing data may take a few minutes. Step 4 refreshes the queries so you can visualize them in redash.
     1.     cd scripts
-    2.     python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/`
+    2.     python3 data_import_agent.py -s 'li-cell' -p ../data/li-ion_cell_samples/
     3.     cd ..
     4.     ./bin/refresh_queries
 
