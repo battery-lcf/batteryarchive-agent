@@ -9,4 +9,3 @@ pyarrow
 requests
 numpy
 sqlalchemy
-h5py
