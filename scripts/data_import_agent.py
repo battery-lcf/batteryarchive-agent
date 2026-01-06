@@ -6,6 +6,7 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import psycopg2
+from psycopg2.extras import execute_values
 from sqlalchemy import create_engine
 import yaml
 import sys, getopt
@@ -93,6 +94,121 @@ def calc_cycle_quantities(df):
     return df
 
 
+
+def fix_cycle_timeseries_buffer(conn_str: str, cell_id: str, *, eps: float = 1e-9) -> int:
+    """
+    Renumber cycle_index and test_time in cycle_timeseries_buffer for a cell_id so they
+    are monotonically increasing with date_time, and test_time remains consistent with
+    real elapsed time across concatenated files (using date_time gaps).
+    """
+
+    sql = """
+        SELECT "index", date_time, cycle_index, test_time
+        FROM public.cycle_timeseries_buffer
+        WHERE cell_id = %s
+        ORDER BY date_time ASC NULLS LAST, "index" ASC
+    """
+
+    with psycopg2.connect(conn_str) as conn:
+        df = pd.read_sql(sql, conn, params=(cell_id,))
+        if df.empty:
+            return 0
+
+        df["cycle_index"] = pd.to_numeric(df["cycle_index"], errors="coerce")
+        df["test_time"] = pd.to_numeric(df["test_time"], errors="coerce")
+        df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
+
+        test_offset = 0.0
+        cycle_offset = 0
+
+        adj_test = []
+        adj_cycle = []
+
+        prev_adj_test = None
+        prev_adj_cycle = None
+
+        prev_raw_test = None
+        prev_raw_cycle = None
+        prev_dt = None
+
+        for raw_cycle, raw_test, dt in zip(df["cycle_index"].tolist(),
+                                           df["test_time"].tolist(),
+                                           df["date_time"].tolist()):
+
+            # Normalize missing
+            raw_cycle = 0 if pd.isna(raw_cycle) else int(raw_cycle)
+            raw_test = 0.0 if pd.isna(raw_test) else float(raw_test)
+            # dt can stay NaT
+
+            # Current adjusted (before any reset handling)
+            cur_adj_test = raw_test + test_offset
+            cur_adj_cycle = raw_cycle + cycle_offset
+
+            # Gap in wall-clock time since previous row (only if both dt present)
+            gap_s = 0.0
+            if prev_dt is not None and pd.notna(prev_dt) and pd.notna(dt):
+                gap_s = max(0.0, (dt - prev_dt).total_seconds())
+
+            # --- Detect and handle TEST TIME reset using RAW test_time ---
+            # This avoids compounding errors from already-offset values.
+            if prev_raw_test is not None and (raw_test + eps < prev_raw_test):
+                # Anchor the new segment to wall-clock continuity:
+                # new_adj_start = prev_adj_test + gap_s
+                if prev_adj_test is None:
+                    prev_adj_test = 0.0
+                test_offset = (prev_adj_test + gap_s) - raw_test
+                cur_adj_test = raw_test + test_offset
+
+            # Extra guard: even without raw reset, ensure monotonic with dt ordering
+            if prev_adj_test is not None and (cur_adj_test + eps < prev_adj_test):
+                # Force forward to at least prev + gap
+                target = prev_adj_test + gap_s
+                test_offset += (target - cur_adj_test)
+                cur_adj_test = raw_test + test_offset
+
+            # --- Detect and handle CYCLE reset (raw-based is usually safer) ---
+            if prev_raw_cycle is not None and (raw_cycle < prev_raw_cycle):
+                if prev_adj_cycle is None:
+                    prev_adj_cycle = 0
+                cycle_offset = prev_adj_cycle - raw_cycle
+                cur_adj_cycle = raw_cycle + cycle_offset
+
+            if prev_adj_cycle is not None and (cur_adj_cycle < prev_adj_cycle):
+                cycle_offset += (prev_adj_cycle - cur_adj_cycle)
+                cur_adj_cycle = raw_cycle + cycle_offset
+
+            adj_test.append(cur_adj_test)
+            adj_cycle.append(cur_adj_cycle)
+
+            prev_adj_test = cur_adj_test
+            prev_adj_cycle = cur_adj_cycle
+            prev_raw_test = raw_test
+            prev_raw_cycle = raw_cycle
+            prev_dt = dt
+
+        df["test_time_fixed"] = adj_test
+        df["cycle_index_fixed"] = adj_cycle
+
+        updates = list(
+            zip(df["index"].astype(int).tolist(),
+                df["cycle_index_fixed"].astype(int).tolist(),
+                df["test_time_fixed"].astype(float).tolist())
+        )
+
+        update_sql = """
+            UPDATE public.cycle_timeseries_buffer AS t
+            SET cycle_index = v.cycle_index,
+                test_time   = v.test_time
+            FROM (VALUES %s) AS v(idx, cycle_index, test_time)
+            WHERE t."index" = v.idx
+        """
+
+        with conn.cursor() as cur:
+            execute_values(cur, update_sql, updates, page_size=2000)
+
+        return len(updates)
+    
+
 # calculate statistics and cycle time
 def calc_stats(df_t):
 
@@ -106,7 +222,9 @@ def calc_stats(df_t):
 
     df_c = pd.DataFrame(data=a, columns=["cycle_index"])
 
-    df_c['cell_id'] = df_t['cell_id']
+    cell_id = df_t['cell_id'].iloc[0]
+    df_c['cell_id'] = cell_id
+
     df_c['cycle_index'] = 0
     df_c['v_max'] = 0
     df_c['i_max'] = 0
@@ -1111,7 +1229,10 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
             if tester == 'voltaiq':
                 print("start import")
                 cycle_index_max = read_save_timeseries_voltaiq(cell_id, file_path, engine, conn) 
-            
+
+            n = fix_cycle_timeseries_buffer(conn, cell_id=cell_id)
+            print("updated rows:", n)
+
             status = "processing"
 
             set_cell_status(cell_id, status, conn)
@@ -1126,7 +1247,12 @@ def add_ts_md_cycle(cell_list, conn, save, plot, path, slash):
 
             print("max cycle: " + str(cycle_index_max))
 
-            start_cycle = 1
+            first_new_cycle = cycle_stats_index_max + 1
+            
+            if first_new_cycle < 1:
+                first_new_cycle = 1
+
+            start_cycle = first_new_cycle
             start_time = time.time()
 
             for i in range(cycle_index_max+1):
