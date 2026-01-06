@@ -1,7 +1,6 @@
 matplotlib
 openpyxl
 pandas
-psycopg2-binary
 xlrd
 pyyaml
 configparser
@@ -9,3 +8,4 @@ pyarrow
 requests
 numpy
 sqlalchemy
+

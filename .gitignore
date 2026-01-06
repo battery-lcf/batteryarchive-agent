@@ -4,3 +4,4 @@ datasources
 postgres-data
 *.DS_Store
 __pycache__
+*.log
